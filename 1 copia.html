@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clasificación desde Google Sheets</title>
+  <style>
+    /* Tu estilo tal cual lo dejamos antes */
+    :root { --bg:#0b0f1a; --card:#11182a; --muted:#7a85a6; --text:#ecf2ff; --accent:#5aa9ff; --gold:#ffd166; --silver:#d6dde6; --bronze:#f4a261; }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;background:radial-gradient(1200px 800px at 10% 10%,#0f1630,transparent),radial-gradient(1200px 800px at 90% 20%,#10223a,transparent),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";}
+    .wrap{max-width:1000px;margin:40px auto;padding:0 20px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+    .title{font-size:clamp(22px,3vw,32px);font-weight:800;letter-spacing:0.2px}
+    .subtitle{color:var(--muted);font-size:14px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(6px);border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,0.35)}
+    .controls{display:flex;flex-wrap:wrap;gap:10px;padding:14px}
+    .controls input,.controls select,.controls button{background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px;font-size:14px}
+    .controls button{cursor:pointer}
+    .controls .chip{font-size:12px;color:var(--muted)}
+    .board{margin-top:14px}
+    .row{display:grid;grid-template-columns:64px 1fr 120px;align-items:center;padding:12px 16px;gap:16px;border-bottom:1px dashed rgba(255,255,255,0.06)}
+    .row:nth-child(odd){background:rgba(255,255,255,0.02)}
+    .pos{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;font-weight:800}
+    .name{font-weight:650}
+    .points{justify-self:end;font-variant-numeric:tabular-nums;font-weight:700}
+    .gold{background:linear-gradient(180deg,rgba(255,209,102,0.2),rgba(255,209,102,0.05));color:var(--gold);border:1px solid rgba(255,209,102,0.4)}
+    .silver{background:linear-gradient(180deg,rgba(214,221,230,0.2),rgba(214,221,230,0.05));color:var(--silver);border:1px solid rgba(214,221,230,0.45)}
+    .bronze{background:linear-gradient(180deg,rgba(244,162,97,0.2),rgba(244,162,97,0.05));color:var(--bronze);border:1px solid rgba(244,162,97,0.45)}
+    .footer{color:var(--muted);font-size:12px;text-align:center;margin-top:18px;padding:10px}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="title">Clasificación</div>
+        <div class="subtitle">Datos en vivo desde Google Sheets</div>
+      </div>
+      <button id="refreshBtn" class="card" title="Actualizar" style="padding:10px 14px;border-radius:14px;border:1px solid rgba(255,255,255,0.12)">↻ Actualizar</button>
+    </header>
+
+    <section class="card">
+      <div class="controls">
+        <div class="chip">Edita estos valores en el código ↓</div>
+        <label><span class="chip">Sheet ID</span><br /><input id="sheetIdInput" type="text" style="width:min(600px,80vw)" /></label>
+        <label><span class="chip">Nombre de pestaña</span><br /><input id="tabNameInput" type="text" placeholder="Hoja 1" /></label>
+        <label><span class="chip">Rango (opcional)</span><br /><input id="rangeInput" type="text" placeholder="A1:C100" /></label>
+        <button id="loadBtn">Cargar desde Google Sheets</button>
+      </div>
+      <div id="status" class="subtitle" style="padding:0 16px 10px"></div>
+      <div id="board" class="board"></div>
+    </section>
+
+    <div class="footer">Cabeceras esperadas: <code>Nombre</code> y <code>Puntos</code>. La posición se calcula automáticamente.</div>
+  </div>
+
+  <script>
+    const CONFIG = {
+      SHEET_ID: "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8",
+      SHEET_NAME: "Hoja 1",
+      RANGE: "",
+      AUTO_REFRESH_MS: 0
+    };
+
+    document.getElementById('sheetIdInput').value = CONFIG.SHEET_ID;
+    document.getElementById('tabNameInput').value = CONFIG.SHEET_NAME;
+    document.getElementById('rangeInput').value = CONFIG.RANGE;
+
+    const statusEl = document.getElementById('status');
+    const boardEl = document.getElementById('board');
+
+    document.getElementById('loadBtn').addEventListener('click', () => {
+      CONFIG.SHEET_ID = document.getElementById('sheetIdInput').value.trim();
+      CONFIG.SHEET_NAME = document.getElementById('tabNameInput').value.trim() || CONFIG.SHEET_NAME;
+      CONFIG.RANGE = document.getElementById('rangeInput').value.trim();
+      load();
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', load);
+
+    if (CONFIG.AUTO_REFRESH_MS > 0) setInterval(load, CONFIG.AUTO_REFRESH_MS);
+
+    function buildGvizUrl() {
+      const base = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq`;
+      const params = new URLSearchParams();
+      if (CONFIG.SHEET_NAME) params.set('sheet', CONFIG.SHEET_NAME);
+      if (CONFIG.RANGE) params.set('range', CONFIG.RANGE);
+      return `${base}?${params.toString()}`;
+    }
+
+    async function load() {
+      try {
+        if (!CONFIG.SHEET_ID) {
+          statusEl.textContent = '⚠️ Configura tu SHEET_ID.';
+          boardEl.innerHTML = '';
+          return;
+        }
+        statusEl.textContent = 'Cargando datos…';
+        const res = await fetch(buildGvizUrl(), { cache: 'no-store' });
+        const text = await res.text();
+        const match = text.match(/setResponse\\((.*)\\);?\\s*$/s);
+        if (!match) throw new Error('No se pudo parsear la respuesta.');
+        const json = JSON.parse(match[1]);
+        if (json.status !== 'ok') throw new Error(json.errors?.[0]?.detailed_message || 'Respuesta no OK');
+        const { cols, rows } = json.table;
+        const headers = cols.map(c => (c.label || c.id || '').toString().trim());
+        const idxName = findHeader(headers, ['nombre','name']);
+        const idxPoints = findHeader(headers, ['puntos','points','score']);
+        if (idxName === -1 || idxPoints === -1) throw new Error(`Faltan columnas. Encontradas: [${headers.join(', ')}]`);
+        const data = rows.map(r => ({
+          name: val(r, idxName),
+          points: toNumber(val(r, idxPoints))
+        })).filter(r => r.name && Number.isFinite(r.points));
+
+        data.sort((a,b) => b.points - a.points);
+        let pos=0,lastPts=null,rank=0;
+        const ranked = data.map((d,i) => {
+          rank++;
+          if (lastPts===null || d.points!==lastPts){pos=rank;lastPts=d.points;}
+          return { ...d, pos };
+        });
+        renderBoard(ranked);
+        statusEl.textContent = `${ranked.length} elementos · última actualización ${new Date().toLocaleTimeString()}`;
+      } catch(err){ console.error(err); statusEl.textContent = `❌ Error: ${err.message}`; boardEl.innerHTML = ''; }
+    }
+
+    function findHeader(headers,candidates){
+      const lower=headers.map(h=>h.toLowerCase());
+      for(const c of candidates){ const idx=lower.indexOf(c.toLowerCase()); if(idx!==-1) return idx; }
+      return -1;
+    }
+    function val(row,idx){const cell=row.c[idx]; if(!cell) return ''; return (cell.f ?? cell.v ?? '').toString().trim();}
+    function toNumber(x){ if(typeof x==='number') return x; const s=(x||'').toString().replace(/\\./g,'').replace(',', '.'); const n=Number(s); return Number.isFinite(n)?n:NaN; }
+
+    function renderBoard(items){
+      boardEl.innerHTML='';
+      items.forEach(item=>{
+        const row=document.createElement('div'); row.className='row';
+        const pos=document.createElement('div'); pos.className='pos'; pos.textContent=item.pos;
+        if(item.pos===1) pos.classList.add('gold');
+        else if(item.pos===2) pos.classList.add('silver');
+        else if(item.pos===3) pos.classList.add('bronze');
+        const name=document.createElement('div'); name.className='name'; name.textContent=item.name;
+        const points=document.createElement('div'); points.className='points'; points.textContent=Intl.NumberFormat(undefined,{maximumFractionDigits:2}).format(item.points);
+        row.append(pos,name,points); boardEl.appendChild(row);
+      });
+    }
+
+    load();
+  </script>
+</body>
+</html>
