@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clasificación desde Google Sheets</title>
+  <style>
+    :root { --bg:#0b0f1a; --card:#11182a; --muted:#7a85a6; --text:#ecf2ff; --gold:#ffd166; --silver:#d6dde6; --bronze:#f4a261; }
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui, sans-serif}
+    .wrap{max-width:700px;margin:40px auto;padding:0 20px}
+    .row{display:grid;grid-template-columns:60px 1fr 100px;align-items:center;padding:10px;border-bottom:1px solid rgba(255,255,255,0.1)}
+    .pos{font-weight:bold;text-align:center}
+    .gold{color:var(--gold)}.silver{color:var(--silver)}.bronze{color:var(--bronze)}
+    .name{font-weight:600}
+    .points{text-align:right}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>🏆 Clasificación</h1>
+    <div id="status">Cargando datos...</div>
+    <div id="board"></div>
+  </div>
+
+  <script>
+    const SHEET_ID = "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
+    const SHEET_NAME = "Hoja 1";
+
+    async function load(){
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}`;
+      const res = await fetch(url);
+      const text = await res.text();
+      const json = JSON.parse(text.substr(47).slice(0,-2));
+      const rows = json.table.rows;
+
+      const data = rows.map(r => ({
+        name: r.c[0]?.v,
+        points: Number(r.c[1]?.v)
+      })).filter(r => r.name && !isNaN(r.points));
+
+      data.sort((a,b) => b.points - a.points);
+
+      const board = document.getElementById("board");
+      board.innerHTML = "";
+      data.forEach((item,i)=>{
+        const row=document.createElement("div");
+        row.className="row";
+        const pos=document.createElement("div");
+        pos.className="pos";
+        pos.textContent=i+1;
+        if(i===0) pos.classList.add("gold");
+        else if(i===1) pos.classList.add("silver");
+        else if(i===2) pos.classList.add("bronze");
+        const name=document.createElement("div"); name.className="name"; name.textContent=item.name;
+        const pts=document.createElement("div"); pts.className="points"; pts.textContent=item.points;
+        row.append(pos,name,pts);
+        board.append(row);
+      });
+      document.getElementById("status").textContent = `Última actualización: ${new Date().toLocaleTimeString()}`;
+    }
+    load();
+  </script>
+</body>
+</html>
