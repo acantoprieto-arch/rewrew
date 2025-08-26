@@ -1,35 +1,100 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Tabla dinámica desde Google Sheets</title>
-  <style>
-    body {
-      background-color: #000;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    h2 { text-align: center; }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #444;
-      padding: 10px;
-      text-align: left;
-    }
-    th { background-color: #222; }
-    tr:nth-child(even) { background-color: #222; }
-    tr:nth-child(odd) { background-color: #000; }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Clasificación Premium</title>
+<style>
+:root{
+--bg:#0b0f1a; --card:#11182a; --muted:#7a85a6; --text:#ecf2ff;
+--gold:#ffd166; --silver:#d6dde6; --bronze:#f4a261; --up:#4ade80; --down:#f87171;
+}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui, sans-serif}
+.wrap{max-width:700px;margin:40px auto;padding:0 20px}
+h1{margin-bottom:10px}
+#search{width:100%;padding:8px 12px;margin-bottom:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:#11182a;color:var(--text)}
+.row{display:grid;grid-template-columns:50px 50px 1fr 80px;align-items:center;padding:10px;border-bottom:1px solid rgba(255,255,255,0.1);transition: background 0.2s, transform 0.3s;}
+.row:nth-child(odd){background:rgba(255,255,255,0.02);}
+.row:hover{background:rgba(255,255,255,0.08);}
+.pos{font-weight:bold;text-align:center}
+.gold{color:var(--gold)}.silver{color:var(--silver)}.bronze{color:var(--bronze)}
+.name{font-weight:600}
+.points{text-align:right}
+.avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;margin-right:8px}
+.movement{font-size:12px;margin-left:6px;}
+.up{color:var(--up)}
+.down{color:var(--down)}
+#status{margin-bottom:8px;color:var(--muted);font-size:14px}
+</style>
 </head>
 <body>
-  <h2>Tabla desde Google Sheets</h2>
-  <table id="miTabla"></table>
+<div class="wrap">
+<h1>🏆 Clasificación Premium</h1>
+<input type="text" id="search" placeholder="🔍 Buscar nombre...">
+<div id="status">Cargando datos...</div>
+<div id="board"></div>
+</div>
 
-  <script>
-    // URL pública de tu CSV
-    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKjM6EtJwKRvQ-Q
+<script>
+const SHEET_ID="1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
+const SHEET_NAME="Hoja 1";
+let data=[], prevData=[];
+
+async function load(){
+    const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}`;
+    const res=await fetch(url);
+    const text=await res.text();
+    const json=JSON.parse(text.substr(47).slice(0,-2));
+    const rows=json.table.rows;
+    prevData = [...data];
+    data=rows.map(r=>({
+        name:r.c[0]?.v,
+        points:Number(r.c[1]?.v),
+        avatar:r.c[2]?.v || ""
+    })).filter(r=>r.name && !isNaN(r.points));
+
+    data.sort((a,b)=>b.points-a.points);
+    renderBoard(data);
+    document.getElementById("status").textContent=`Última actualización: ${new Date().toLocaleTimeString()}`;
+}
+
+function getMovement(name,index){
+    const prev = prevData.find(d=>d.name===name);
+    if(!prev) return '';
+    const prevIndex = prevData.indexOf(prev);
+    if(prevIndex>index) return '<span class="movement up">↑</span>';
+    else if(prevIndex<index) return '<span class="movement down">↓</span>';
+    else return '';
+}
+
+function renderBoard(items){
+    const board=document.getElementById("board");
+    board.innerHTML="";
+    items.forEach((item,i)=>{
+        const row=document.createElement("div"); row.className="row";
+        const pos=document.createElement("div"); pos.className="pos"; pos.textContent=i+1;
+        if(i===0) pos.classList.add("gold");
+        else if(i===1) pos.classList.add("silver");
+        else if(i===2) pos.classList.add("bronze");
+
+        const avatar=document.createElement("img"); avatar.className="avatar"; avatar.src=item.avatar||"https://via.placeholder.com/40";
+        const name=document.createElement("div"); name.className="name"; name.innerHTML=item.name+getMovement(item.name,i);
+        const pts=document.createElement("div"); pts.className="points"; pts.textContent=item.points;
+
+        row.append(pos,avatar,name,pts);
+        board.append(row);
+    });
+}
+
+document.getElementById("search").addEventListener("input",e=>{
+    const term=e.target.value.toLowerCase();
+    const filtered=data.filter(d=>d.name.toLowerCase().includes(term));
+    renderBoard(filtered);
+});
+
+// Recarga cada 30s y actualiza movimientos
+load();
+setInterval(load,30000);
+</script>
+</body>
+</html>
