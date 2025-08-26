@@ -36,10 +36,12 @@
     google.charts.setOnLoadCallback(drawTable);
 
     function drawTable() {
-      // Reemplaza con el ID de tu hoja de cálculo
+      // ID de tu hoja de cálculo
       const sheetId = '1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8';
+      const sheetName = 'Sheet1'; // Cambia si tu pestaña tiene otro nombre
+
       const query = new google.visualization.Query(
-        `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=Sheet1`
+        `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${sheetName}`
       );
 
       query.send(response => {
@@ -56,17 +58,4 @@
         }
         html += "</tr></thead><tbody>";
 
-        for (let r = 0; r < data.getNumberOfRows(); r++) {
-          html += "<tr>";
-          for (let c = 0; c < data.getNumberOfColumns(); c++) {
-            html += `<td>${data.getValue(r,c)}</td>`;
-          }
-          html += "</tr>";
-        }
-        html += "</tbody>";
-        document.getElementById("miTabla").innerHTML = html;
-      });
-    }
-  </script>
-</body>
-</html>
+        for (let r
