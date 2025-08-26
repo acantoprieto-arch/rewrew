@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Tabla desde Google Sheets</title>
+  <title>Tabla dinámica desde Google Sheets</title>
   <style>
     body {
       background-color: #000;
@@ -25,51 +25,11 @@
     tr:nth-child(even) { background-color: #222; }
     tr:nth-child(odd) { background-color: #000; }
   </style>
-  <!-- Tabletop.js -->
-  <script src="https://cdn.jsdelivr.net/npm/tabletop@1.6.0/src/tabletop.min.js"></script>
 </head>
 <body>
   <h2>Tabla desde Google Sheets</h2>
   <table id="miTabla"></table>
 
   <script>
-    const publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRKjM6EtJwKRvQ-QFOSqjaC-_eiv0KhHwHlvJEx4PEs4z3p1Fytv2-28zS_yfwcWBiTE11VZNnWEfUP/pub?output=csv';
-
-    function init() {
-      Tabletop.init({
-        key: publicSpreadsheetUrl,
-        simpleSheet: true,
-        callback: showInfo
-      });
-    }
-
-    function showInfo(data, tabletop) {
-      if (!data || data.length === 0) {
-        document.getElementById("miTabla").innerHTML = '<tr><td colspan="100%">No hay datos</td></tr>';
-        return;
-      }
-
-      // Crear encabezados
-      let html = '<thead><tr>';
-      Object.keys(data[0]).forEach(key => {
-        html += `<th>${key}</th>`;
-      });
-      html += '</tr></thead><tbody>';
-
-      // Crear filas
-      data.forEach(row => {
-        html += '<tr>';
-        Object.values(row).forEach(value => {
-          html += `<td>${value}</td>`;
-        });
-        html += '</tr>';
-      });
-
-      html += '</tbody>';
-      document.getElementById('miTabla').innerHTML = html;
-    }
-
-    window.addEventListener('DOMContentLoaded', init);
-  </script>
-</body>
-</html>
+    // URL pública de tu CSV
+    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKjM6EtJwKRvQ-Q
