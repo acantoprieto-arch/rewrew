@@ -2,12 +2,16 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Tabla desde Google Sheets (CSV)</title>
+  <title>Tabla dinámica desde Google Sheets</title>
   <style>
     body {
       background-color: #000;
       color: #fff;
       font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
     }
     table {
       border-collapse: collapse;
@@ -35,32 +39,31 @@
   <table id="miTabla"></table>
 
   <script>
-    //  Aquí va tu URL pública en formato CSV
-    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKjM6EtJwKRvQ-QFOSqjaC-_eiv0KhHwHlvJEx4PEs4z3p1Fytv2-28zS_yfwcWBiTE11VZNnWEfUP/pub?gid=0&single=true&output=csv";
+    // 🔹 Sustituye esta URL por la URL pública CSV de tu Google Sheet
+    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKjM6EtJwKRvQ-QFOSqjaC-_eiv0KhHwHlvJEx4PEs4z3p1Fytv2-28zS_yfwcWBiTE11VZNnWEfUP/pub?output=csv";
 
     fetch(url)
       .then(response => {
-        if (!response.ok) {
-          throw new Error("Error al cargar la hoja: " + response.status);
-        }
+        if (!response.ok) throw new Error("HTTP error " + response.status);
         return response.text();
       })
-      .then(data => {
-        const filas = data.trim().split("\n").map(linea => linea.split(","));
+      .then(csv => {
+        const rows = csv.trim().split("\n").map(r => r.split(","));
         let html = "<thead><tr>";
-        filas[0].forEach(celda => html += `<th>${celda}</th>`);
+        rows[0].forEach(cell => html += `<th>${cell}</th>`);
         html += "</tr></thead><tbody>";
-        for (let i = 1; i < filas.length; i++) {
+        rows.slice(1).forEach(r => {
           html += "<tr>";
-          filas[i].forEach(celda => html += `<td>${celda}</td>`);
+          r.forEach(cell => html += `<td>${cell}</td>`);
           html += "</tr>";
-        }
+        });
         html += "</tbody>";
         document.getElementById("miTabla").innerHTML = html;
       })
       .catch(err => {
-        console.error(err);
-        document.getElementById("miTabla").innerHTML = `<tr><td colspan="100%">Error: ${err.message}</td></tr>`;
+        console.error("Error al cargar la hoja:", err);
+        document.getElementById("miTabla").innerHTML =
+          `<tr><td colspan="100%">Error: ${err.message}</td></tr>`;
       });
   </script>
 </body>
