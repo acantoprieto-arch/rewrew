@@ -1,100 +1,153 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Clasificación Premium</title>
+<meta charset="UTF-8">
+<title>Clasificación</title>
 <style>
-:root{
---bg:#0b0f1a; --card:#11182a; --muted:#7a85a6; --text:#ecf2ff;
---gold:#ffd166; --silver:#d6dde6; --bronze:#f4a261; --up:#4ade80; --down:#f87171;
-}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui, sans-serif}
-.wrap{max-width:700px;margin:40px auto;padding:0 20px}
-h1{margin-bottom:10px}
-#search{width:100%;padding:8px 12px;margin-bottom:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:#11182a;color:var(--text)}
-.row{display:grid;grid-template-columns:50px 50px 1fr 80px;align-items:center;padding:10px;border-bottom:1px solid rgba(255,255,255,0.1);transition: background 0.2s, transform 0.3s;}
-.row:nth-child(odd){background:rgba(255,255,255,0.02);}
-.row:hover{background:rgba(255,255,255,0.08);}
-.pos{font-weight:bold;text-align:center}
-.gold{color:var(--gold)}.silver{color:var(--silver)}.bronze{color:var(--bronze)}
-.name{font-weight:600}
-.points{text-align:right}
-.avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;margin-right:8px}
-.movement{font-size:12px;margin-left:6px;}
-.up{color:var(--up)}
-.down{color:var(--down)}
-#status{margin-bottom:8px;color:var(--muted);font-size:14px}
+  body {
+    background-color: #000;
+    font-family: Arial, sans-serif;
+    color: #fff;
+    margin: 20px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  th, td {
+    text-align: center;
+    padding: 0 10px;
+    height: 70px;
+    vertical-align: middle;
+  }
+
+  th {
+    font-weight: bold;
+    border-bottom: 2px solid #555;
+  }
+
+  tr:nth-child(even) {
+    background-color: #111;
+  }
+
+  tr:nth-child(odd) {
+    background-color: #000;
+  }
+
+  tr:hover {
+    background-color: #333;
+  }
+
+  .pos {
+    background-color: #fff;
+    color: #000;
+    font-weight: bold;
+  }
+
+  .clase {
+    background-color: #c00;
+    color: #fff;
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+  }
+
+  .numero {
+    background-color: #fff;
+    color: #000;
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+
+  .piloto {
+    font-weight: bold;
+  }
+
+  .pts {
+    font-weight: bold;
+  }
+
+  .img-cell img {
+    height: 32px;
+    width: auto;
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-<h1>🏆 Clasificación Premium</h1>
-<input type="text" id="search" placeholder="🔍 Buscar nombre...">
-<div id="status">Cargando datos...</div>
-<div id="board"></div>
-</div>
+
+<table id="clasificacion">
+  <thead>
+    <tr>
+      <th>Pos</th>
+      <th>Clase</th>
+      <th>Piloto</th>
+      <th>#</th>
+      <th>Equipo</th>
+      <th>Coche</th>
+      <th>Marca</th>
+      <th>Espec</th>
+      <th>Pen</th>
+      <th>R1</th>
+      <th>R2</th>
+      <th>R3</th>
+      <th>R4</th>
+      <th>Pts</th>
+      <th>Gap</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
 
 <script>
-const SHEET_ID="1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
-const SHEET_NAME="Hoja 1";
-let data=[], prevData=[];
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKjM6EtJwKRvQ-QFOSqjaC-_eiv0KhHwHlvJEx4PEs4z3p1Fytv2-28zS_yfwcWBiTE11VZNnWEfUP/pub?gid=373798981&single=true&output=csv";
 
-async function load(){
-    const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}`;
-    const res=await fetch(url);
-    const text=await res.text();
-    const json=JSON.parse(text.substr(47).slice(0,-2));
-    const rows=json.table.rows;
-    prevData = [...data];
-    data=rows.map(r=>({
-        name:r.c[0]?.v,
-        points:Number(r.c[1]?.v),
-        avatar:r.c[2]?.v || ""
-    })).filter(r=>r.name && !isNaN(r.points));
+  fetch(CSV_URL)
+    .then(res => res.text())
+    .then(csvText => {
+      const lines = csvText.split("\n").filter(line => line.trim() !== "");
+      const headers = lines.shift().split(",");
+      const tbody = document.querySelector("#clasificacion tbody");
 
-    data.sort((a,b)=>b.points-a.points);
-    renderBoard(data);
-    document.getElementById("status").textContent=`Última actualización: ${new Date().toLocaleTimeString()}`;
-}
+      lines.forEach((line, index) => {
+        const values = line.split(",");
 
-function getMovement(name,index){
-    const prev = prevData.find(d=>d.name===name);
-    if(!prev) return '';
-    const prevIndex = prevData.indexOf(prev);
-    if(prevIndex>index) return '<span class="movement up">↑</span>';
-    else if(prevIndex<index) return '<span class="movement down">↓</span>';
-    else return '';
-}
+        // Calcular Gap desplazado (fila 1 vacía)
+        let gap = "";
+        if(index > 0){
+          const ptsActual = parseInt(values[13]) || 0;
+          const ptsAnterior = parseInt(lines[index-1].split(",")[13]) || 0;
+          gap = ptsAnterior - ptsActual;
+        }
 
-function renderBoard(items){
-    const board=document.getElementById("board");
-    board.innerHTML="";
-    items.forEach((item,i)=>{
-        const row=document.createElement("div"); row.className="row";
-        const pos=document.createElement("div"); pos.className="pos"; pos.textContent=i+1;
-        if(i===0) pos.classList.add("gold");
-        else if(i===1) pos.classList.add("silver");
-        else if(i===2) pos.classList.add("bronze");
-
-        const avatar=document.createElement("img"); avatar.className="avatar"; avatar.src=item.avatar||"https://via.placeholder.com/40";
-        const name=document.createElement("div"); name.className="name"; name.innerHTML=item.name+getMovement(item.name,i);
-        const pts=document.createElement("div"); pts.className="points"; pts.textContent=item.points;
-
-        row.append(pos,avatar,name,pts);
-        board.append(row);
-    });
-}
-
-document.getElementById("search").addEventListener("input",e=>{
-    const term=e.target.value.toLowerCase();
-    const filtered=data.filter(d=>d.name.toLowerCase().includes(term));
-    renderBoard(filtered);
-});
-
-// Recarga cada 30s y actualiza movimientos
-load();
-setInterval(load,30000);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="pos">${values[0]}</td>
+          <td><span class="clase">GT3</span></td>
+          <td class="piloto">${values[2]}</td>
+          <td class="numero">${values[3]}</td>
+          <td>${values[4]}</td>
+          <td class="img-cell">${values[5] ? `<img src="${values[5]}" alt="Coche">` : ""}</td>
+          <td class="img-cell">${values[6] ? `<img src="${values[6]}" alt="Marca">` : "<img src='https://cdn.thesimgrid.com/meolcsgh9xums1wa7amcchkqdbmo' alt='Marca'>"} </td>
+          <td>${values[7]}</td>
+          <td>${values[8]}</td>
+          <td>${values[9]}</td>
+          <td>${values[10]}</td>
+          <td>${values[11]}</td>
+          <td>${values[12]}</td>
+          <td class="pts">${values[13]}</td>
+          <td>${gap}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    })
+    .catch(err => console.error(err));
 </script>
+
 </body>
 </html>
