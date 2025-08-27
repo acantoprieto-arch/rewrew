@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Clasificación</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
   body {
     background-color: #000;
-    font-family: Arial, sans-serif;
+    font-family: Arial,sans-serif;
     color: #fff;
     margin: 20px;
   }
@@ -20,8 +21,11 @@
   th, td {
     text-align: center;
     padding: 0 10px;
-    height: 70px;
+    height: 60px;        /* fila más estrecha */
     vertical-align: middle;
+    white-space: nowrap;  /* todo en una sola línea */
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   th {
@@ -50,18 +54,18 @@
   .clase {
     background-color: #c00;
     color: #fff;
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 4px;
+    display:inline-block;
+    padding:5px 10px;
+    border-radius:4px;
   }
 
   .numero {
     background-color: #fff;
     color: #000;
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-weight: bold;
+    display:inline-block;
+    padding:5px 10px;
+    border-radius:4px;
+    font-weight:bold;
   }
 
   .piloto {
@@ -100,53 +104,57 @@
       <th>Gap</th>
     </tr>
   </thead>
-  <tbody>
-  </tbody>
+  <tbody></tbody>
 </table>
 
 <script>
-  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKjM6EtJwKRvQ-QFOSqjaC-_eiv0KhHwHlvJEx4PEs4z3p1Fytv2-28zS_yfwcWBiTE11VZNnWEfUP/pub?gid=373798981&single=true&output=csv";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKjM6EtJwKRvQ-QFOSqjaC-_eiv0KhHwHlvJEx4PEs4z3p1Fytv2-28zS_yfwcWBiTE11VZNnWEfUP/pub?gid=373798981&single=true&output=csv";
 
-  fetch(CSV_URL)
-    .then(res => res.text())
-    .then(csvText => {
-      const lines = csvText.split("\n").filter(line => line.trim() !== "");
-      const headers = lines.shift().split(",");
-      const tbody = document.querySelector("#clasificacion tbody");
+Papa.parse(CSV_URL, {
+  download: true,
+  header: true,
+  skipEmptyLines: true,
+  complete: function(results) {
+    const tbody = document.querySelector("#clasificacion tbody");
+    const data = results.data;
 
-      lines.forEach((line, index) => {
-        const values = line.split(",");
+    data.forEach((row, index) => {
+      const tr = document.createElement("tr");
 
-        // Calcular Gap desplazado (fila 1 vacía)
-        let gap = "";
-        if(index > 0){
-          const ptsActual = parseInt(values[13]) || 0;
-          const ptsAnterior = parseInt(lines[index-1].split(",")[13]) || 0;
-          gap = ptsAnterior - ptsActual;
-        }
+      // Gap: diferencia de Pts con fila anterior
+      let gap = "";
+      if(index > 0){
+        const ptsActual = parseInt(row["Pts"]) || 0;
+        const ptsAnterior = parseInt(data[index-1]["Pts"]) || 0;
+        gap = ptsAnterior - ptsActual;
+      }
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="pos">${values[0]}</td>
-          <td><span class="clase">GT3</span></td>
-          <td class="piloto">${values[2]}</td>
-          <td class="numero">${values[3]}</td>
-          <td>${values[4]}</td>
-          <td class="img-cell">${values[5] ? `<img src="${values[5]}" alt="Coche">` : ""}</td>
-          <td class="img-cell">${values[6] ? `<img src="${values[6]}" alt="Marca">` : "<img src='https://cdn.thesimgrid.com/meolcsgh9xums1wa7amcchkqdbmo' alt='Marca'>"} </td>
-          <td>${values[7]}</td>
-          <td>${values[8]}</td>
-          <td>${values[9]}</td>
-          <td>${values[10]}</td>
-          <td>${values[11]}</td>
-          <td>${values[12]}</td>
-          <td class="pts">${values[13]}</td>
-          <td>${gap}</td>
-        `;
-        tbody.appendChild(tr);
+      // Limpiar saltos de línea en todas las celdas
+      Object.keys(row).forEach(key => {
+        if(row[key]) row[key] = String(row[key]).replace(/\r?\n|\r/g, " ").trim();
       });
-    })
-    .catch(err => console.error(err));
+
+      tr.innerHTML = `
+        <td class="pos">${row["Pos"]}</td>
+        <td><span class="clase">GT3</span></td>
+        <td class="piloto">${row["Piloto"]}</td>
+        <td class="numero">${row["#"]}</td>
+        <td>${row["Equipo"]}</td>
+        <td class="img-cell">${row["Coche"] ? `<img src="${row["Coche"]}" alt="Coche">` : ""}</td>
+        <td class="img-cell">${row["Marca"] ? `<img src="${row["Marca"]}" alt="Marca">` : "<img src='https://cdn.thesimgrid.com/meolcsgh9xums1wa7amcchkqdbmo'>"} </td>
+        <td>${row["Espec"]}</td>
+        <td>${row["Pen"]}</td>
+        <td>${row["R1"]}</td>
+        <td>${row["R2"]}</td>
+        <td>${row["R3"]}</td>
+        <td>${row["R4"]}</td>
+        <td class="pts">${row["Pts"]}</td>
+        <td>${gap}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+});
 </script>
 
 </body>
