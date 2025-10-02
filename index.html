@@ -19,7 +19,9 @@
     margin: auto;
   }
   th, td {
+    padding: 5px 10px;
     text-align: center;
+    font-size: 14px;
   }
   /* Estilos reutilizables */
   .estilo-encabezado { font-size: 12px; font-weight: bold; }
@@ -27,7 +29,7 @@
   .estilo-piloto { font-size: 16px; font-weight: bold; }
   .estilo-puntos { font-size: 16px; font-weight: bold; }
   .estilo-numero { font-size: 16px; font-weight: bold; background-color: white; color: black; }
-  .equipo { min-width: 180px; font-size: 10px; }
+  .equipo { min-width: 180px; font-size: 14px; }
   .marca img, .espec img {
     max-height: 30px;
     margin-top: 2px;
@@ -35,11 +37,7 @@
     margin-left: auto;
     margin-right: auto;
   }
-  .resto { font-size: 10px; }
-
-  /* Padding extra entre columnas para dar más espacio */
-  .espacio-derecha { padding-right: 20px; } /* Entre Espec y R1 */
-  .espacio-izquierda { padding-left: 20px; } /* Entre R4 y Puntos */
+  .resto { font-size: 14px; }
 
   /* Alternancia de fila para las columnas normales */
   .fila-par td.resto, .fila-par td.equipo, .fila-par td.marca, .fila-par td.espec { background-color: #282828; }
@@ -108,10 +106,7 @@ fetch(url)
           td.className = "marca";
           td.innerHTML = `<img src="${value}" alt="Marca">`;
         } else if (cols[i] === "Espec.") {
-          td.className = "espec espacio-derecha"; // Espacio extra a la derecha
-          td.innerText = value;
-        } else if (cols[i] === "R4") {
-          td.className = "resto espacio-izquierda"; // Espacio extra a la izquierda para separar de Puntos
+          td.className = "espec";
           td.innerText = value;
         } else {
           td.className = "resto";
