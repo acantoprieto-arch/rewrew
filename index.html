@@ -1,161 +1,98 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Clasificación</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<style>
-  body {
-    background-color: #000;
-    font-family: Arial,sans-serif;
-    color: #fff;
-    margin: 20px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-  }
-
-  th, td {
-    text-align: center;
-    padding: 0 10px;
-    height: 60px;        /* fila más estrecha */
-    vertical-align: middle;
-    white-space: nowrap;  /* todo en una sola línea */
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  th {
-    font-weight: bold;
-    border-bottom: 2px solid #555;
-  }
-
-  tr:nth-child(even) {
-    background-color: #111;
-  }
-
-  tr:nth-child(odd) {
-    background-color: #000;
-  }
-
-  tr:hover {
-    background-color: #333;
-  }
-
-  .pos {
-    background-color: #fff;
-    color: #000;
-    font-weight: bold;
-  }
-
-  .clase {
-    background-color: #c00;
-    color: #fff;
-    display:inline-block;
-    padding:5px 10px;
-    border-radius:4px;
-  }
-
-  .numero {
-    background-color: #fff;
-    color: #000;
-    display:inline-block;
-    padding:5px 10px;
-    border-radius:4px;
-    font-weight:bold;
-  }
-
-  .piloto {
-    font-weight: bold;
-  }
-
-  .pts {
-    font-weight: bold;
-  }
-
-  .img-cell img {
-    height: 32px;
-    width: auto;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Clasificación</title>
+  <style>
+    body {
+      background-color: #888;
+      font-family: Arial, sans-serif;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 1200px;
+      margin: auto;
+    }
+    th, td {
+      padding: 5px 10px;
+      text-align: center;
+    }
+    th {
+      background-color: black;
+      font-size: 16px;
+    }
+    tr:nth-child(even) td {
+      background-color: #282828;
+    }
+    tr:nth-child(odd) td {
+      background-color: #1e1e1e;
+    }
+    .posicion {
+      width: 50px;
+      height: 35px;
+      background-color: #DD0000;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .numero {
+      background-color: white;
+      color: black;
+      font-size: 18px;
+    }
+  </style>
 </head>
 <body>
+  <h1>Clasificación</h1>
+  <table id="clasificacion"></table>
 
-<table id="clasificacion">
-  <thead>
-    <tr>
-      <th>Pos</th>
-      <th>Clase</th>
-      <th>Piloto</th>
-      <th>#</th>
-      <th>Equipo</th>
-      <th>Coche</th>
-      <th>Marca</th>
-      <th>Espec</th>
-      <th>Pen</th>
-      <th>R1</th>
-      <th>R2</th>
-      <th>R3</th>
-      <th>R4</th>
-      <th>Pts</th>
-      <th>Gap</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+  <script>
+    const sheetId = "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
+    const sheetName = "Clas3";
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
 
-<script>
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKjM6EtJwKRvQ-QFOSqjaC-_eiv0KhHwHlvJEx4PEs4z3p1Fytv2-28zS_yfwcWBiTE11VZNnWEfUP/pub?gid=373798981&single=true&output=csv";
+    fetch(url)
+      .then(res => res.text())
+      .then(data => {
+        const json = JSON.parse(data.substr(47).slice(0, -2));
+        const cols = json.table.cols.map(c => c.label);
+        const rows = json.table.rows;
 
-Papa.parse(CSV_URL, {
-  download: true,
-  header: true,
-  skipEmptyLines: true,
-  complete: function(results) {
-    const tbody = document.querySelector("#clasificacion tbody");
-    const data = results.data;
+        const table = document.getElementById("clasificacion");
 
-    data.forEach((row, index) => {
-      const tr = document.createElement("tr");
+        // Cabecera
+        const thead = document.createElement("thead");
+        const trHead = document.createElement("tr");
+        cols.forEach(col => {
+          const th = document.createElement("th");
+          th.innerText = col;
+          trHead.appendChild(th);
+        });
+        thead.appendChild(trHead);
+        table.appendChild(thead);
 
-      // Gap: diferencia de Pts con fila anterior
-      let gap = "";
-      if(index > 0){
-        const ptsActual = parseInt(row["Pts"]) || 0;
-        const ptsAnterior = parseInt(data[index-1]["Pts"]) || 0;
-        gap = ptsAnterior - ptsActual;
-      }
+        // Filas
+        const tbody = document.createElement("tbody");
+        rows.forEach(row => {
+          const tr = document.createElement("tr");
+          row.c.forEach((cell, i) => {
+            const td = document.createElement("td");
+            td.innerText = cell ? cell.v : "";
 
-      // Limpiar saltos de línea en todas las celdas
-      Object.keys(row).forEach(key => {
-        if(row[key]) row[key] = String(row[key]).replace(/\r?\n|\r/g, " ").trim();
-      });
+            if (i === 0) td.className = "posicion"; // Columna Posición
+            if (cols[i] === "#") td.className = "numero"; // Columna #
 
-      tr.innerHTML = `
-        <td class="pos">${row["Pos"]}</td>
-        <td><span class="clase">GT3</span></td>
-        <td class="piloto">${row["Piloto"]}</td>
-        <td class="numero">${row["#"]}</td>
-        <td>${row["Equipo"]}</td>
-        <td class="img-cell">${row["Coche"] ? `<img src="${row["Coche"]}" alt="Coche">` : ""}</td>
-        <td class="img-cell">${row["Marca"] ? `<img src="${row["Marca"]}" alt="Marca">` : "<img src='https://cdn.thesimgrid.com/meolcsgh9xums1wa7amcchkqdbmo'>"} </td>
-        <td>${row["Espec"]}</td>
-        <td>${row["Pen"]}</td>
-        <td>${row["R1"]}</td>
-        <td>${row["R2"]}</td>
-        <td>${row["R3"]}</td>
-        <td>${row["R4"]}</td>
-        <td class="pts">${row["Pts"]}</td>
-        <td>${gap}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-});
-</script>
-
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+      })
+      .catch(err => console.error(err));
+  </script>
 </body>
 </html>
