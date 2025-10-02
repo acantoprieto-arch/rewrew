@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Clasificación Profesional</title>
+<title>Clasificación</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 <style>
   body {
@@ -20,17 +20,10 @@
   }
   th, td {
     text-align: center;
-    vertical-align: middle;
-    padding: 8px 10px;
   }
-  th {
-    font-size: 20px;
-    background-color: black;
-  }
-
   /* Estilos reutilizables */
   .estilo-encabezado { font-size: 12px; font-weight: bold; }
-  .estilo-posicion { font-size: 24px; font-weight: bold; color: white; background-color: #DD0000; width: 50px; }
+  .estilo-posicion { font-size: 24px; font-weight: bold; color: white; background-color: #DD0000; }
   .estilo-piloto { font-size: 16px; font-weight: bold; }
   .estilo-puntos { font-size: 16px; font-weight: bold; }
   .estilo-numero { font-size: 16px; font-weight: bold; background-color: white; color: black; }
@@ -44,20 +37,19 @@
   }
   .resto { font-size: 10px; }
 
-  /* Espacios extra entre columnas */
-  .espacio-derecha { padding-right: 20px; }
-  .espacio-izquierda { padding-left: 20px; }
+  /* Padding extra entre columnas para dar más espacio */
+  .espacio-derecha { padding-right: 20px; } /* Entre Espec y R1 */
+  .espacio-izquierda { padding-left: 20px; } /* Entre R4 y Puntos */
 
-  /* Alternancia de fila para columnas normales */
+  /* Alternancia de fila para las columnas normales */
   .fila-par td.resto, .fila-par td.equipo, .fila-par td.marca, .fila-par td.espec { background-color: #282828; }
   .fila-impar td.resto, .fila-impar td.equipo, .fila-impar td.marca, .fila-impar td.espec { background-color: #1e1e1e; }
 
-  /* Altura de fila más grande */
-  tbody tr { height: 40px; }
+  th { font-size: 20px; background-color: black; }
 </style>
 </head>
 <body>
-<h1 class="estilo-encabezado">Clasificación Profesional</h1>
+<h1 class="estilo-encabezado">Clasificación</h1>
 <table id="clasificacion"></table>
 
 <script>
@@ -96,6 +88,7 @@ fetch(url)
         const td = document.createElement("td");
         const value = cell ? cell.v : "";
 
+        // Aplicar estilos según columna
         if (cols[i] === "Posición") {
           td.className = "estilo-posicion";
           td.innerText = value;
@@ -115,10 +108,10 @@ fetch(url)
           td.className = "marca";
           td.innerHTML = `<img src="${value}" alt="Marca">`;
         } else if (cols[i] === "Espec.") {
-          td.className = "espec espacio-derecha";
+          td.className = "espec espacio-derecha"; // Espacio extra a la derecha
           td.innerText = value;
         } else if (cols[i] === "R4") {
-          td.className = "resto espacio-izquierda";
+          td.className = "resto espacio-izquierda"; // Espacio extra a la izquierda para separar de Puntos
           td.innerText = value;
         } else {
           td.className = "resto";
