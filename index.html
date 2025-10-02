@@ -13,21 +13,33 @@
     padding: 20px;
   }
 
+  h1 {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  .table-container {
+    overflow-x: auto; /* Scroll horizontal en móviles */
+    width: 100%;
+  }
+
   table {
     border-collapse: collapse;
     width: 100%;
-    max-width: 1400px;
-    margin: auto;
+    min-width: 800px; /* Evita que se achique demasiado */
   }
 
   th, td {
     padding: 5px 10px;
     text-align: center;
     font-size: 14px; /* default */
+    white-space: nowrap; /* Evita que los textos se partan en varias líneas */
   }
 
   th {
     background-color: black;
+    font-size: 12px; /* Encabezados */
   }
 
   tr:nth-child(even) td {
@@ -43,7 +55,6 @@
   .estilo2 { font-size: 24px; font-weight: bold; color: white; background-color: #DD0000; } /* Posición */
   .estilo3 { font-size: 16px; font-weight: bold; } /* Piloto y Puntos */
   .estilo4 { font-size: 16px; font-weight: bold; background-color: white; color: black; } /* # */
-
   .equipo { min-width: 180px; font-size: 14px; }
   .marca img, .espec img {
     max-height: 30px;
@@ -52,13 +63,27 @@
     margin-left: auto;
     margin-right: auto;
   }
-
   .resto { font-size: 14px; }
+
+  /* Responsive: ajustar fuentes y padding en móviles */
+  @media (max-width: 768px) {
+    th, td {
+      padding: 4px 6px;
+      font-size: 12px;
+    }
+    .estilo2 { font-size: 20px; }
+    .estilo3 { font-size: 14px; }
+    .estilo4 { font-size: 14px; }
+    .marca img, .espec img { max-height: 24px; }
+    .equipo { min-width: 140px; }
+  }
 </style>
 </head>
 <body>
 <h1 class="encabezado1">Clasificación</h1>
-<table id="clasificacion"></table>
+<div class="table-container">
+  <table id="clasificacion"></table>
+</div>
 
 <script>
 const sheetId = "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
@@ -80,7 +105,7 @@ fetch(url)
     cols.forEach(col => {
       const th = document.createElement("th");
       th.innerText = col;
-      th.className = "encabezado1"; // Usamos estilo 1 para encabezados
+      th.className = "encabezado1";
       trHead.appendChild(th);
     });
     thead.appendChild(trHead);
@@ -94,7 +119,6 @@ fetch(url)
         const td = document.createElement("td");
         let value = cell ? cell.v : "";
 
-        // Aplicar clases según columna
         if (cols[i] === "Posición") {
           td.className = "estilo2";
         } else if (cols[i] === "Piloto" || cols[i] === "Puntos") {
