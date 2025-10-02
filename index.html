@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Clasificación</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 <style>
   body {
     background-color: #1e1e1e;
-    font-family: Arial, sans-serif;
+    font-family: 'Montserrat', sans-serif;
     color: white;
     margin: 0;
     padding: 20px;
@@ -18,57 +19,37 @@
     margin: auto;
   }
   th, td {
-    padding: 5px 10px;
     text-align: center;
-    font-size: 14px;
   }
-  th {
-    background-color: black;
-    font-size: 20px; /* Encabezado */
-  }
-  tr:nth-child(even) td {
-    background-color: #282828;
-  }
-  tr:nth-child(odd) td {
-    background-color: #1e1e1e;
-  }
-  .posicion {
-    background-color: #DD0000;
-    color: white;
-    font-size: 28px;
-    font-weight: bold;
-    width: 50px;
-  }
-  .piloto {
-    font-weight: bold;
-    font-size: 20px;
-  }
-  .numero {
-    background-color: white;
-    color: black;
-    font-weight: bold;
-    font-size: 28px;
-  }
-  .equipo {
-    min-width: 180px;
-    font-size: 14px;
-  }
+  /* Estilos reutilizables */
+  .estilo-encabezado { font-size: 12px; font-weight: bold; }
+  .estilo-posicion { font-size: 24px; font-weight: bold; color: white; background-color: #DD0000; }
+  .estilo-piloto { font-size: 16px; font-weight: bold; }
+  .estilo-puntos { font-size: 16px; font-weight: bold; }
+  .estilo-numero { font-size: 16px; font-weight: bold; background-color: white; color: black; }
+  .equipo { min-width: 180px; font-size: 10px; }
   .marca img, .espec img {
-    height: 32px;
+    max-height: 30px;
+    margin-top: 2px;
     display: block;
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
   }
-  .puntos {
-    font-weight: bold;
-    font-size: 20px;
-  }
-  .resto {
-    font-size: 14px;
-  }
+  .resto { font-size: 10px; }
+
+  /* Padding extra entre columnas para dar más espacio */
+  .espacio-derecha { padding-right: 20px; } /* Entre Espec y R1 */
+  .espacio-izquierda { padding-left: 20px; } /* Entre R4 y Puntos */
+
+  /* Alternancia de fila para las columnas normales */
+  .fila-par td.resto, .fila-par td.equipo, .fila-par td.marca, .fila-par td.espec { background-color: #282828; }
+  .fila-impar td.resto, .fila-impar td.equipo, .fila-impar td.marca, .fila-impar td.espec { background-color: #1e1e1e; }
+
+  th { font-size: 20px; background-color: black; }
 </style>
 </head>
 <body>
-<h1>Clasificación</h1>
+<h1 class="estilo-encabezado">Clasificación</h1>
 <table id="clasificacion"></table>
 
 <script>
@@ -91,6 +72,7 @@ fetch(url)
     cols.forEach(col => {
       const th = document.createElement("th");
       th.innerText = col;
+      th.className = "estilo-encabezado";
       trHead.appendChild(th);
     });
     thead.appendChild(trHead);
@@ -98,34 +80,47 @@ fetch(url)
 
     // Filas
     const tbody = document.createElement("tbody");
-    rows.forEach(row => {
+    rows.forEach((row, index) => {
       const tr = document.createElement("tr");
+      tr.className = (index % 2 === 0) ? "fila-par" : "fila-impar";
+
       row.c.forEach((cell, i) => {
         const td = document.createElement("td");
-        let value = cell ? cell.v : "";
+        const value = cell ? cell.v : "";
 
-        // Columnas con estilos especiales
+        // Aplicar estilos según columna
         if (cols[i] === "Posición") {
-          td.className = "posicion";
+          td.className = "estilo-posicion";
+          td.innerText = value;
         } else if (cols[i] === "Piloto") {
-          td.className = "piloto";
+          td.className = "estilo-piloto";
+          td.innerText = value;
         } else if (cols[i] === "#") {
-          td.className = "numero";
+          td.className = "estilo-numero";
+          td.innerText = value;
+        } else if (cols[i] === "Puntos") {
+          td.className = "estilo-puntos";
+          td.innerText = value;
         } else if (cols[i] === "Equipo") {
           td.className = "equipo";
+          td.innerText = value;
         } else if (cols[i] === "Marca") {
+          td.className = "marca";
           td.innerHTML = `<img src="${value}" alt="Marca">`;
         } else if (cols[i] === "Espec.") {
-          td.innerHTML = `<span>${value}</span>`;
-        } else if (cols[i] === "Puntos") {
-          td.className = "puntos";
+          td.className = "espec espacio-derecha"; // Espacio extra a la derecha
+          td.innerText = value;
+        } else if (cols[i] === "R4") {
+          td.className = "resto espacio-izquierda"; // Espacio extra a la izquierda para separar de Puntos
+          td.innerText = value;
         } else {
           td.className = "resto";
+          td.innerText = value;
         }
 
-        if (!td.innerHTML) td.innerText = value;
         tr.appendChild(td);
       });
+
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
