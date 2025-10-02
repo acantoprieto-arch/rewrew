@@ -31,10 +31,16 @@
   }
 
   th, td {
-    padding: 5px 10px;
+    padding: 0 10px; /* solo horizontal, el vertical se maneja con height y line-height */
     text-align: center;
     white-space: nowrap;
-    height: 50px; /* altura fija de fila */
+    height: 50px;
+    max-height: 50px;
+    min-height: 50px;
+    line-height: 46px; /* centrado vertical (50px - 2px arriba y abajo) */
+    overflow: hidden;
+    box-sizing: border-box;
+    vertical-align: middle;
   }
 
   th {
@@ -52,12 +58,12 @@
   .equipo { min-width: 180px; font-size: 14px; }
   .resto { font-size: 14px; }
 
-  /* Ajuste de columna Puntos para que siempre sea 14px bold */
+  /* Ajuste columna Puntos */
   td.puntos { font-size: 14px; font-weight: bold; }
 
   /* Logos de Marca */
   .marca img {
-    max-height: 46px; /* fila 50px menos 2px arriba y 2px abajo */
+    max-height: 46px; /* 50px fila - 2px arriba y 2px abajo */
     height: auto;
     display: block;
     margin: 2px auto; /* centrado horizontal y margen vertical */
@@ -66,7 +72,7 @@
 
   /* Responsive */
   @media (max-width: 768px) {
-    th, td { padding: 4px 6px; font-size: 12px; }
+    th, td { padding: 0 6px; font-size: 12px; line-height: 22px; }
     .estilo2 { font-size: 20px; }
     .estilo3 { font-size: 12px; }
     .estilo4 { font-size: 12px; }
@@ -119,7 +125,7 @@ fetch(url)
         // Asignar clases por columna
         if (cols[i] === "Posición") td.className = "estilo2";
         else if (cols[i] === "Piloto") td.className = "estilo3";
-        else if (cols[i] === "Puntos") td.className = "estilo3 puntos"; // Puntos en 14px bold
+        else if (cols[i] === "Puntos") td.className = "estilo3 puntos";
         else if (cols[i] === "#") td.className = "estilo4";
         else if (cols[i] === "Equipo") td.className = "equipo";
         else if (cols[i] === "Marca") td.innerHTML = `<img src="${value}" alt="Marca">`;
