@@ -1,98 +1,133 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Clasificación</title>
-  <style>
-    body {
-      background-color: #888;
-      font-family: Arial, sans-serif;
-      color: white;
-      margin: 0;
-      padding: 20px;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      max-width: 1200px;
-      margin: auto;
-    }
-    th, td {
-      padding: 5px 10px;
-      text-align: center;
-    }
-    th {
-      background-color: black;
-      font-size: 16px;
-    }
-    tr:nth-child(even) td {
-      background-color: #282828;
-    }
-    tr:nth-child(odd) td {
-      background-color: #1e1e1e;
-    }
-    .posicion {
-      width: 50px;
-      height: 35px;
-      background-color: #DD0000;
-      color: white;
-      font-size: 28px;
-      font-weight: bold;
-    }
-    .numero {
-      background-color: white;
-      color: black;
-      font-size: 18px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Clasificación</title>
+<style>
+  body {
+    background-color: #1e1e1e;
+    font-family: Arial, sans-serif;
+    color: white;
+    margin: 0;
+    padding: 20px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 1400px;
+    margin: auto;
+  }
+  th, td {
+    padding: 5px 10px;
+    text-align: center;
+    font-size: 10px;
+  }
+  th {
+    background-color: black;
+    font-size: 12px;
+  }
+  tr:nth-child(even) td {
+    background-color: #282828;
+  }
+  tr:nth-child(odd) td {
+    background-color: #1e1e1e;
+  }
+  .posicion {
+    background-color: #DD0000;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    width: 50px;
+  }
+  .piloto {
+    font-weight: bold;
+    font-size: 12px;
+  }
+  .numero {
+    background-color: white;
+    color: black;
+    font-weight: bold;
+    font-size: 12px;
+  }
+  .equipo {
+    min-width: 180px;
+  }
+  .marca img, .espec img {
+    height: 24px;
+    display: block;
+    margin: auto;
+  }
+  .puntos {
+    font-weight: bold;
+    font-size: 12px;
+  }
+</style>
 </head>
 <body>
-  <h1>Clasificación</h1>
-  <table id="clasificacion"></table>
+<h1>Clasificación</h1>
+<table id="clasificacion"></table>
 
-  <script>
-    const sheetId = "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
-    const sheetName = "Clas3";
-    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+<script>
+const sheetId = "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
+const sheetName = "Clas3";
+const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
 
-    fetch(url)
-      .then(res => res.text())
-      .then(data => {
-        const json = JSON.parse(data.substr(47).slice(0, -2));
-        const cols = json.table.cols.map(c => c.label);
-        const rows = json.table.rows;
+fetch(url)
+  .then(res => res.text())
+  .then(data => {
+    const json = JSON.parse(data.substr(47).slice(0, -2));
+    const cols = json.table.cols.map(c => c.label);
+    const rows = json.table.rows;
 
-        const table = document.getElementById("clasificacion");
+    const table = document.getElementById("clasificacion");
 
-        // Cabecera
-        const thead = document.createElement("thead");
-        const trHead = document.createElement("tr");
-        cols.forEach(col => {
-          const th = document.createElement("th");
-          th.innerText = col;
-          trHead.appendChild(th);
-        });
-        thead.appendChild(trHead);
-        table.appendChild(thead);
+    // Cabecera
+    const thead = document.createElement("thead");
+    const trHead = document.createElement("tr");
+    cols.forEach(col => {
+      const th = document.createElement("th");
+      th.innerText = col;
+      trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+    table.appendChild(thead);
 
-        // Filas
-        const tbody = document.createElement("tbody");
-        rows.forEach(row => {
-          const tr = document.createElement("tr");
-          row.c.forEach((cell, i) => {
-            const td = document.createElement("td");
-            td.innerText = cell ? cell.v : "";
+    // Filas
+    const tbody = document.createElement("tbody");
+    rows.forEach(row => {
+      const tr = document.createElement("tr");
+      row.c.forEach((cell, i) => {
+        const td = document.createElement("td");
+        let value = cell ? cell.v : "";
 
-            if (i === 0) td.className = "posicion"; // Columna Posición
-            if (cols[i] === "#") td.className = "numero"; // Columna #
+        // Columnas con estilos especiales
+        if (cols[i] === "Posición") {
+          td.className = "posicion";
+        } else if (cols[i] === "Piloto") {
+          td.className = "piloto";
+        } else if (cols[i] === "#") {
+          td.className = "numero";
+        } else if (cols[i] === "Equipo") {
+          td.className = "equipo";
+        } else if (cols[i] === "Marca") {
+          // reemplaza "url_de_imagen" por tu link de imagen
+          td.innerHTML = `<img src="${value}" alt="Marca">`;
+        } else if (cols[i] === "Espec.") {
+          td.innerHTML = `<span>${value}</span>`; // Si quieres imagen, reemplaza con <img src="...">
+        } else if (cols[i] === "Puntos") {
+          td.className = "puntos";
+        } else {
+          td.style.fontSize = "10px";
+        }
 
-            tr.appendChild(td);
-          });
-          tbody.appendChild(tr);
-        });
-        table.appendChild(tbody);
-      })
-      .catch(err => console.error(err));
-  </script>
+        if (!td.innerHTML) td.innerText = value;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+  })
+  .catch(err => console.error(err));
+</script>
 </body>
 </html>
