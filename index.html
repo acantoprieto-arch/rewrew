@@ -20,11 +20,11 @@
   th, td {
     padding: 5px 10px;
     text-align: center;
-    font-size: 10px;
+    font-size: 14px;
   }
   th {
     background-color: black;
-    font-size: 12px;
+    font-size: 20px; /* Encabezado */
   }
   tr:nth-child(even) td {
     background-color: #282828;
@@ -35,31 +35,35 @@
   .posicion {
     background-color: #DD0000;
     color: white;
-    font-size: 14px;
+    font-size: 28px;
     font-weight: bold;
     width: 50px;
   }
   .piloto {
     font-weight: bold;
-    font-size: 12px;
+    font-size: 20px;
   }
   .numero {
     background-color: white;
     color: black;
     font-weight: bold;
-    font-size: 12px;
+    font-size: 28px;
   }
   .equipo {
     min-width: 180px;
+    font-size: 14px;
   }
   .marca img, .espec img {
-    height: 24px;
+    height: 32px;
     display: block;
     margin: auto;
   }
   .puntos {
     font-weight: bold;
-    font-size: 12px;
+    font-size: 20px;
+  }
+  .resto {
+    font-size: 14px;
   }
 </style>
 </head>
@@ -110,14 +114,13 @@ fetch(url)
         } else if (cols[i] === "Equipo") {
           td.className = "equipo";
         } else if (cols[i] === "Marca") {
-          // reemplaza "url_de_imagen" por tu link de imagen
           td.innerHTML = `<img src="${value}" alt="Marca">`;
         } else if (cols[i] === "Espec.") {
-          td.innerHTML = `<span>${value}</span>`; // Si quieres imagen, reemplaza con <img src="...">
+          td.innerHTML = `<span>${value}</span>`;
         } else if (cols[i] === "Puntos") {
           td.className = "puntos";
         } else {
-          td.style.fontSize = "10px";
+          td.className = "resto";
         }
 
         if (!td.innerHTML) td.innerText = value;
