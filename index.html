@@ -5,100 +5,71 @@
 <title>Clasificación</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 <style>
-body {
-  background-color: #1e1e1e;
-  font-family: 'Montserrat', sans-serif;
-  color: white;
-  margin: 0;
-  padding: 20px;
-}
-
-h1 {
-  text-align: center;
-  font-size: 14px;
-  margin-bottom: 20px;
-}
-
-.table-container {
-  overflow-x: auto;
-  width: 100%;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 800px;
-}
-
-th, td {
-  padding: 0;
-  text-align: center;
-  white-space: nowrap;
-  height: 42px;
-  vertical-align: middle;
-}
-
-th {
-  background-color: black;
-}
-
-/* Colores de filas alternadas */
-tr:nth-child(even) td { background-color: #282828; }
-tr:nth-child(odd) td { background-color: #1e1e1e; }
-
-/* Estilos reutilizables */
-.encabezado1 { font-size: 14px; font-weight: bold; }
-
-.estilo2 { /* Posición */
-  font-size: 24px;
-  font-weight: bold;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #DD0000;
-  height: 100%;
-}
-
-.estilo3 { font-size: 14px; font-weight: bold; }
-
-.estilo4 { /* # con rectángulo blanco detrás */
-  font-size: 14px;
-  font-weight: bold;
-  color: black;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: white;
-  height: 100%;
-}
-
-.equipo { min-width: 180px; font-size: 14px; }
-
-.resto { font-size: 14px; }
-
-/* Logos de Marca */
-.marca img {
-  max-height: 38px; /* Ajustado para caber en 42px fila con margen */
-  height: auto;
-  margin-top: 2px;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  object-fit: contain;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  th, td {
-    font-size: 12px;
+  body {
+    background-color: #1e1e1e;
+    font-family: 'Montserrat', sans-serif;
+    color: white;
+    margin: 0;
+    padding: 20px;
   }
-  .estilo2 { font-size: 20px; }
-  .estilo3 { font-size: 12px; }
-  .estilo4 { font-size: 12px; }
-  .marca img { max-height: 24px; }
-  .equipo { min-width: 140px; }
-}
+
+  h1 {
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 800px;
+  }
+
+  th, td {
+    padding: 5px 10px;
+    text-align: center;
+    white-space: nowrap;
+    height: 50px; /* altura fija de fila */
+  }
+
+  th {
+    background-color: black;
+  }
+
+  tr:nth-child(even) td { background-color: #282828; }
+  tr:nth-child(odd) td { background-color: #1e1e1e; }
+
+  /* Estilos reutilizables */
+  .encabezado1 { font-size: 14px; font-weight: bold; }
+  .estilo2 { font-size: 24px; font-weight: bold; color: white; background-color: #DD0000; } /* Posición */
+  .estilo3 { font-size: 14px; font-weight: bold; } /* Piloto y Puntos */
+  .estilo4 { font-size: 14px; font-weight: bold; background-color: white; color: black; text-decoration: none; } /* # */
+  .equipo { min-width: 180px; font-size: 14px; }
+  .resto { font-size: 14px; }
+
+  /* Logos de Marca */
+  .marca img {
+    max-height: 46px; /* 50px fila - 2px arriba - 2px abajo */
+    height: auto;
+    display: block;
+    margin: 2px auto; /* margen vertical 2px, centrado horizontal */
+    object-fit: contain;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    th, td { padding: 4px 6px; font-size: 12px; }
+    .estilo2 { font-size: 20px; }
+    .estilo3 { font-size: 12px; }
+    .estilo4 { font-size: 12px; }
+    .marca img { max-height: 24px; }
+    .equipo { min-width: 140px; }
+  }
 </style>
 </head>
 <body>
@@ -141,26 +112,15 @@ fetch(url)
         const td = document.createElement("td");
         let value = cell ? cell.v : "";
 
-        if (cols[i] === "Posición") {
-          td.className = "estilo2";
-          td.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">${value}</div>`;
-        } else if (cols[i] === "Piloto" || cols[i] === "Puntos") {
-          td.className = "estilo3";
-          td.innerText = value;
-        } else if (cols[i] === "#") {
-          td.className = "estilo4";
-          td.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">${value}</div>`;
-        } else if (cols[i] === "Equipo") {
-          td.className = "equipo";
-          td.innerText = value;
-        } else if (cols[i] === "Marca") {
-          td.className = "marca";
-          td.innerHTML = `<img src="${value}" alt="Marca">`;
-        } else {
-          td.className = "resto";
-          td.innerText = value;
-        }
+        // Asignar clases por columna
+        if (cols[i] === "Posición") td.className = "estilo2";
+        else if (cols[i] === "Piloto" || cols[i] === "Puntos") td.className = "estilo3";
+        else if (cols[i] === "#") td.className = "estilo4";
+        else if (cols[i] === "Equipo") td.className = "equipo";
+        else if (cols[i] === "Marca") td.innerHTML = `<img src="${value}" alt="Marca">`;
+        else td.className = "resto";
 
+        if (!td.innerHTML) td.innerText = value;
         tr.appendChild(td);
       });
       tbody.appendChild(tr);
