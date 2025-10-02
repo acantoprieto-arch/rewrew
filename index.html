@@ -20,26 +20,25 @@
   }
 
   .table-container {
-    overflow-x: auto; /* Scroll horizontal en móviles */
+    overflow-x: auto;
     width: 100%;
   }
 
   table {
     border-collapse: collapse;
     width: 100%;
-    min-width: 800px; /* Evita que se achique demasiado */
+    min-width: 800px;
   }
 
   th, td {
     padding: 5px 10px;
     text-align: center;
-    font-size: 14px; /* default */
-    white-space: nowrap; /* Evita que los textos se partan en varias líneas */
+    font-size: 14px;
+    white-space: nowrap;
   }
 
   th {
     background-color: black;
-    font-size: 12px; /* Encabezados */
   }
 
   tr:nth-child(even) td {
@@ -56,16 +55,18 @@
   .estilo3 { font-size: 16px; font-weight: bold; } /* Piloto y Puntos */
   .estilo4 { font-size: 16px; font-weight: bold; background-color: white; color: black; } /* # */
   .equipo { min-width: 180px; font-size: 14px; }
-  .marca img, .espec img {
-    max-height: 30px;
-    margin-top: 2px;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-  }
   .resto { font-size: 14px; }
 
-  /* Responsive: ajustar fuentes y padding en móviles */
+  /* Logos de Marca solo */
+  .marca img {
+    max-height: 30px;
+    height: auto;
+    display: block;
+    margin: 2px auto 0 auto;
+    object-fit: contain;
+  }
+
+  /* Responsive */
   @media (max-width: 768px) {
     th, td {
       padding: 4px 6px;
@@ -74,7 +75,7 @@
     .estilo2 { font-size: 20px; }
     .estilo3 { font-size: 14px; }
     .estilo4 { font-size: 14px; }
-    .marca img, .espec img { max-height: 24px; }
+    .marca img { max-height: 24px; }
     .equipo { min-width: 140px; }
   }
 </style>
@@ -129,8 +130,6 @@ fetch(url)
           td.className = "equipo";
         } else if (cols[i] === "Marca") {
           td.innerHTML = `<img src="${value}" alt="Marca">`;
-        } else if (cols[i] === "Espec.") {
-          td.innerHTML = `<span>${value}</span>`;
         } else {
           td.className = "resto";
         }
