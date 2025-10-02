@@ -15,7 +15,7 @@
 
   h1 {
     text-align: center;
-    font-size: 16px;
+    font-size: 14px;
     margin-bottom: 20px;
   }
 
@@ -33,33 +33,54 @@
   th, td {
     padding: 5px 10px;
     text-align: center;
-    font-size: 14px;
     white-space: nowrap;
+    height: 42px;
   }
 
   th {
     background-color: black;
   }
 
-  tr:nth-child(even) td {
-    background-color: #282828;
-  }
-
-  tr:nth-child(odd) td {
-    background-color: #1e1e1e;
-  }
+  tr:nth-child(even) td { background-color: #282828; }
+  tr:nth-child(odd) td { background-color: #1e1e1e; }
 
   /* Estilos reutilizables */
-  .encabezado1 { font-size: 12px; font-weight: bold; }
-  .estilo2 { font-size: 24px; font-weight: bold; color: white; background-color: #DD0000; } /* Posición */
-  .estilo3 { font-size: 16px; font-weight: bold; } /* Piloto y Puntos */
-  .estilo4 { font-size: 16px; font-weight: bold; background-color: white; color: black; } /* # */
-  .equipo { min-width: 180px; font-size: 14px; }
+  .encabezado1 { 
+    font-size: 14px; 
+    font-weight: bold; 
+  }
+
+  .estilo2 { 
+    font-size: 24px; 
+    font-weight: bold; 
+    color: white; 
+    background-color: #DD0000; 
+  }
+
+  .estilo3 { 
+    font-size: 14px; 
+    font-weight: bold; 
+  }
+
+  .estilo4 { 
+    font-size: 14px; 
+    font-weight: bold; 
+    background-color: white; 
+    color: black; 
+    text-decoration: underline;
+    text-decoration-color: white;
+  }
+
+  .equipo { 
+    min-width: 180px; 
+    font-size: 14px; 
+  }
+
   .resto { font-size: 14px; }
 
-  /* Logos de Marca solo */
+  /* Logos de Marca */
   .marca img {
-    max-height: 30px;
+    max-height: 32px;
     height: auto;
     display: block;
     margin: 2px auto 0 auto;
@@ -68,13 +89,10 @@
 
   /* Responsive */
   @media (max-width: 768px) {
-    th, td {
-      padding: 4px 6px;
-      font-size: 12px;
-    }
+    th, td { padding: 4px 6px; font-size: 12px; }
     .estilo2 { font-size: 20px; }
-    .estilo3 { font-size: 14px; }
-    .estilo4 { font-size: 14px; }
+    .estilo3 { font-size: 12px; }
+    .estilo4 { font-size: 12px; }
     .marca img { max-height: 24px; }
     .equipo { min-width: 140px; }
   }
@@ -120,19 +138,13 @@ fetch(url)
         const td = document.createElement("td");
         let value = cell ? cell.v : "";
 
-        if (cols[i] === "Posición") {
-          td.className = "estilo2";
-        } else if (cols[i] === "Piloto" || cols[i] === "Puntos") {
-          td.className = "estilo3";
-        } else if (cols[i] === "#") {
-          td.className = "estilo4";
-        } else if (cols[i] === "Equipo") {
-          td.className = "equipo";
-        } else if (cols[i] === "Marca") {
-          td.innerHTML = `<img src="${value}" alt="Marca">`;
-        } else {
-          td.className = "resto";
-        }
+        // Asignar clases por columna
+        if (cols[i] === "Posición") td.className = "estilo2";
+        else if (cols[i] === "Piloto" || cols[i] === "Puntos") td.className = "estilo3";
+        else if (cols[i] === "#") td.className = "estilo4";
+        else if (cols[i] === "Equipo") td.className = "equipo";
+        else if (cols[i] === "Marca") td.innerHTML = `<img src="${value}" alt="Marca">`;
+        else td.className = "resto";
 
         if (!td.innerHTML) td.innerText = value;
         tr.appendChild(td);
