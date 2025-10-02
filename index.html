@@ -3,72 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <title>Clasificación</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 <style>
   body {
     background-color: #1e1e1e;
-    font-family: Arial, sans-serif;
+    font-family: 'Montserrat', sans-serif;
     color: white;
     margin: 0;
     padding: 20px;
   }
+
   table {
     border-collapse: collapse;
     width: 100%;
     max-width: 1400px;
     margin: auto;
   }
+
   th, td {
     padding: 5px 10px;
     text-align: center;
-    font-size: 14px;
+    font-size: 14px; /* default */
   }
+
   th {
     background-color: black;
-    font-size: 20px; /* Encabezado */
   }
+
   tr:nth-child(even) td {
     background-color: #282828;
   }
+
   tr:nth-child(odd) td {
     background-color: #1e1e1e;
   }
-  .posicion {
-    background-color: #DD0000;
-    color: white;
-    font-size: 28px;
-    font-weight: bold;
-    width: 50px;
-  }
-  .piloto {
-    font-weight: bold;
-    font-size: 20px;
-  }
-  .numero {
-    background-color: white;
-    color: black;
-    font-weight: bold;
-    font-size: 28px;
-  }
-  .equipo {
-    min-width: 180px;
-    font-size: 14px;
-  }
+
+  /* Estilos reutilizables */
+  .encabezado1 { font-size: 12px; font-weight: bold; }
+  .estilo2 { font-size: 24px; font-weight: bold; color: white; background-color: #DD0000; } /* Posición */
+  .estilo3 { font-size: 16px; font-weight: bold; } /* Piloto y Puntos */
+  .estilo4 { font-size: 16px; font-weight: bold; background-color: white; color: black; } /* # */
+
+  .equipo { min-width: 180px; font-size: 14px; }
   .marca img, .espec img {
-    height: 32px;
+    max-height: 30px;
+    margin-top: 2px;
     display: block;
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
   }
-  .puntos {
-    font-weight: bold;
-    font-size: 20px;
-  }
-  .resto {
-    font-size: 14px;
-  }
+
+  .resto { font-size: 14px; }
 </style>
 </head>
 <body>
-<h1>Clasificación</h1>
+<h1 class="encabezado1">Clasificación</h1>
 <table id="clasificacion"></table>
 
 <script>
@@ -91,6 +80,7 @@ fetch(url)
     cols.forEach(col => {
       const th = document.createElement("th");
       th.innerText = col;
+      th.className = "encabezado1"; // Usamos estilo 1 para encabezados
       trHead.appendChild(th);
     });
     thead.appendChild(trHead);
@@ -104,21 +94,19 @@ fetch(url)
         const td = document.createElement("td");
         let value = cell ? cell.v : "";
 
-        // Columnas con estilos especiales
+        // Aplicar clases según columna
         if (cols[i] === "Posición") {
-          td.className = "posicion";
-        } else if (cols[i] === "Piloto") {
-          td.className = "piloto";
+          td.className = "estilo2";
+        } else if (cols[i] === "Piloto" || cols[i] === "Puntos") {
+          td.className = "estilo3";
         } else if (cols[i] === "#") {
-          td.className = "numero";
+          td.className = "estilo4";
         } else if (cols[i] === "Equipo") {
           td.className = "equipo";
         } else if (cols[i] === "Marca") {
           td.innerHTML = `<img src="${value}" alt="Marca">`;
         } else if (cols[i] === "Espec.") {
           td.innerHTML = `<span>${value}</span>`;
-        } else if (cols[i] === "Puntos") {
-          td.className = "puntos";
         } else {
           td.className = "resto";
         }
