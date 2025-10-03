@@ -1,144 +1,99 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Clasificación</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-<style>
-  body {
-    background-color: #1e1e1e;
-    font-family: 'Montserrat', sans-serif;
-    color: white;
-    margin: 0;
-    padding: 20px;
-  }
+  <meta charset="UTF-8">
+  <title>Clasificación</title>
+  <style>
+    body {
+      background: #1e1e1e;
+      font-family: 'Montserrat', sans-serif;
+      color: white;
+    }
 
-  h1 {
-    text-align: center;
-    font-size: 14px;
-    margin-bottom: 20px;
-  }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
 
-  .table-container {
-    overflow-x: auto;
-    width: 100%;
-  }
+    th, td {
+      height: 50px;
+      text-align: center;
+    }
 
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    min-width: 800px;
-  }
+    /* --- Caja inclinada para POSICIÓN --- */
+    .posicion-box {
+      display: inline-block;
+      background-color: #DD0000; /* rojo */
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      padding: 6px 14px;
+      transform: skew(-20deg);
+      text-align: center;
+      min-width: 40px;
+    }
+    .posicion-box span {
+      display: inline-block;
+      transform: skew(20deg); /* endereza el número */
+    }
 
-  th, td {
-    padding: 0 10px; /* solo horizontal, el vertical se maneja con height y line-height */
-    text-align: center;
-    white-space: nowrap;
-    height: 50px;
-    max-height: 50px;
-    min-height: 50px;
-    line-height: 46px; /* centrado vertical (50px - 2px arriba y abajo) */
-    overflow: hidden;
-    box-sizing: border-box;
-    vertical-align: middle;
-  }
+    /* --- Caja inclinada para DORSAL (#) --- */
+    .dorsal-box {
+      display: inline-block;
+      background-color: #FFFFFF; /* blanco */
+      color: black;
+      font-weight: bold;
+      font-size: 20px;
+      padding: 6px 14px;
+      transform: skew(-20deg);
+      text-align: center;
+      min-width: 40px;
+    }
+    .dorsal-box span {
+      display: inline-block;
+      transform: skew(20deg);
+    }
 
-  th {
-    background-color: black;
-  }
-
-  tr:nth-child(even) td { background-color: #282828; }
-  tr:nth-child(odd) td { background-color: #1e1e1e; }
-
-  /* Estilos reutilizables */
-  .encabezado1 { font-size: 14px; font-weight: bold; }
-  .estilo2 { font-size: 24px; font-weight: bold; color: white; background-color: #DD0000; } /* Posición */
-  .estilo3 { font-size: 14px; font-weight: bold; } /* Piloto y Puntos */
-  .estilo4 { font-size: 14px; font-weight: bold; background-color: white; color: black; text-decoration: none; } /* # */
-  .equipo { min-width: 180px; font-size: 14px; }
-  .resto { font-size: 14px; }
-
-  /* Ajuste columna Puntos */
-  td.puntos { font-size: 14px; font-weight: bold; }
-
-  /* Logos de Marca */
-  .marca img {
-    max-height: 46px; /* 50px fila - 2px arriba y 2px abajo */
-    height: auto;
-    display: block;
-    margin: 2px auto; /* centrado horizontal y margen vertical */
-    object-fit: contain;
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    th, td { padding: 0 6px; font-size: 12px; line-height: 22px; }
-    .estilo2 { font-size: 20px; }
-    .estilo3 { font-size: 12px; }
-    .estilo4 { font-size: 12px; }
-    td.puntos { font-size: 12px; }
-    .marca img { max-height: 24px; }
-    .equipo { min-width: 140px; }
-  }
-</style>
+    /* Logos en columna Marca */
+    .marca img {
+      max-height: 46px;
+      margin: 2px auto;
+      display: block;
+    }
+  </style>
 </head>
 <body>
-<h1 class="encabezado1">Clasificación</h1>
-<div class="table-container">
-  <table id="clasificacion"></table>
-</div>
 
-<script>
-const sheetId = "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
-const sheetName = "Clas3";
-const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+  <table>
+    <thead>
+      <tr>
+        <th>Posición</th>
+        <th>Piloto</th>
+        <th>#</th>
+        <th>Equipo</th>
+        <th>Marca</th>
+        <th>Puntos</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><div class="posicion-box"><span>1</span></div></td>
+        <td><b>Piloto Ejemplo</b></td>
+        <td><div class="dorsal-box"><span>23</span></div></td>
+        <td>Equipo Demo</td>
+        <td class="marca"><img src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Ferrari-Logo.png" alt="marca"></td>
+        <td><b>100</b></td>
+      </tr>
+      <tr>
+        <td><div class="posicion-box"><span>2</span></div></td>
+        <td><b>Otro Piloto</b></td>
+        <td><div class="dorsal-box"><span>99</span></div></td>
+        <td>Team Test</td>
+        <td class="marca"><img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/BMW_logo_%28gray%29.svg" alt="marca"></td>
+        <td><b>85</b></td>
+      </tr>
+    </tbody>
+  </table>
 
-fetch(url)
-  .then(res => res.text())
-  .then(data => {
-    const json = JSON.parse(data.substr(47).slice(0, -2));
-    const cols = json.table.cols.map(c => c.label);
-    const rows = json.table.rows;
-
-    const table = document.getElementById("clasificacion");
-
-    // Cabecera
-    const thead = document.createElement("thead");
-    const trHead = document.createElement("tr");
-    cols.forEach(col => {
-      const th = document.createElement("th");
-      th.innerText = col;
-      th.className = "encabezado1";
-      trHead.appendChild(th);
-    });
-    thead.appendChild(trHead);
-    table.appendChild(thead);
-
-    // Filas
-    const tbody = document.createElement("tbody");
-    rows.forEach(row => {
-      const tr = document.createElement("tr");
-      row.c.forEach((cell, i) => {
-        const td = document.createElement("td");
-        let value = cell ? cell.v : "";
-
-        // Asignar clases por columna
-        if (cols[i] === "Posición") td.className = "estilo2";
-        else if (cols[i] === "Piloto") td.className = "estilo3";
-        else if (cols[i] === "Puntos") td.className = "estilo3 puntos";
-        else if (cols[i] === "#") td.className = "estilo4";
-        else if (cols[i] === "Equipo") td.className = "equipo";
-        else if (cols[i] === "Marca") td.innerHTML = `<img src="${value}" alt="Marca">`;
-        else td.className = "resto";
-
-        if (!td.innerHTML) td.innerText = value;
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
-    });
-    table.appendChild(tbody);
-  })
-  .catch(err => console.error(err));
-</script>
 </body>
 </html>
