@@ -31,13 +31,13 @@
   }
 
   th, td {
-    padding: 0 10px;
+    padding: 0 10px; /* solo horizontal, el vertical se maneja con height y line-height */
     text-align: center;
     white-space: nowrap;
     height: 50px;
     max-height: 50px;
     min-height: 50px;
-    line-height: 46px;
+    line-height: 46px; /* centrado vertical (50px - 2px arriba y abajo) */
     overflow: hidden;
     box-sizing: border-box;
     vertical-align: middle;
@@ -50,47 +50,32 @@
   tr:nth-child(even) td { background-color: #282828; }
   tr:nth-child(odd) td { background-color: #1e1e1e; }
 
-  /* --- Cajas inclinadas --- */
-  .posicion-box {
-    display: inline-block;
-    background-color: #DD0000;
-    color: white;
-    font-weight: bold;
-    font-size: 20px;
-    padding: 6px 14px;
-    transform: skew(-20deg);
-    min-width: 40px;
-  }
-  .posicion-box span { display: inline-block; transform: skew(20deg); }
-
-  .dorsal-box {
-    display: inline-block;
-    background-color: #FFFFFF;
-    color: black;
-    font-weight: bold;
-    font-size: 20px;
-    padding: 6px 14px;
-    transform: skew(-20deg);
-    min-width: 40px;
-  }
-  .dorsal-box span { display: inline-block; transform: skew(20deg); }
-
-  /* Otros estilos */
+  /* Estilos reutilizables */
   .encabezado1 { font-size: 14px; font-weight: bold; }
+  .estilo2 { font-size: 24px; font-weight: bold; color: white; background-color: #DD0000; } /* Posición */
+  .estilo3 { font-size: 14px; font-weight: bold; } /* Piloto y Puntos */
+  .estilo4 { font-size: 14px; font-weight: bold; background-color: white; color: black; text-decoration: none; } /* # */
   .equipo { min-width: 180px; font-size: 14px; }
+  .resto { font-size: 14px; }
+
+  /* Ajuste columna Puntos */
   td.puntos { font-size: 14px; font-weight: bold; }
+
+  /* Logos de Marca */
   .marca img {
-    max-height: 46px;
+    max-height: 46px; /* 50px fila - 2px arriba y 2px abajo */
     height: auto;
     display: block;
-    margin: 2px auto;
+    margin: 2px auto; /* centrado horizontal y margen vertical */
     object-fit: contain;
   }
 
   /* Responsive */
   @media (max-width: 768px) {
     th, td { padding: 0 6px; font-size: 12px; line-height: 22px; }
-    .posicion-box, .dorsal-box { font-size: 16px; padding: 4px 10px; }
+    .estilo2 { font-size: 20px; }
+    .estilo3 { font-size: 12px; }
+    .estilo4 { font-size: 12px; }
     td.puntos { font-size: 12px; }
     .marca img { max-height: 24px; }
     .equipo { min-width: 140px; }
@@ -137,15 +122,16 @@ fetch(url)
         const td = document.createElement("td");
         let value = cell ? cell.v : "";
 
-        // Asignar clases por columna y cajas inclinadas
-        if (cols[i] === "Posición") td.innerHTML = `<div class="posicion-box"><span>${value}</span></div>`;
-        else if (cols[i] === "#") td.innerHTML = `<div class="dorsal-box"><span>${value}</span></div>`;
-        else if (cols[i] === "Piloto") td.className = "encabezado1", td.innerText = value;
-        else if (cols[i] === "Puntos") td.className = "puntos", td.innerText = value;
-        else if (cols[i] === "Equipo") td.className = "equipo", td.innerText = value;
+        // Asignar clases por columna
+        if (cols[i] === "Posición") td.className = "estilo2";
+        else if (cols[i] === "Piloto") td.className = "estilo3";
+        else if (cols[i] === "Puntos") td.className = "estilo3 puntos";
+        else if (cols[i] === "#") td.className = "estilo4";
+        else if (cols[i] === "Equipo") td.className = "equipo";
         else if (cols[i] === "Marca") td.innerHTML = `<img src="${value}" alt="Marca">`;
-        else td.innerText = value;
+        else td.className = "resto";
 
+        if (!td.innerHTML) td.innerText = value;
         tr.appendChild(td);
       });
       tbody.appendChild(tr);
