@@ -28,23 +28,27 @@
     border-collapse: collapse;
     width: 100%;
     min-width: 800px;
+    table-layout: fixed; /* evita que se deformen las celdas */
   }
 
   th, td {
-    padding: 0 10px;
     text-align: center;
     white-space: nowrap;
-    height: 42px;
+    height: 42px;          /* altura fija */
     max-height: 42px;
-    min-height: 42px;
-    line-height: 38px; /* 42px - 2px arriba/abajo */
     overflow: hidden;
+    padding: 0 10px;
+    vertical-align: middle; /* centra verticalmente */
     box-sizing: border-box;
-    vertical-align: middle;
   }
 
   th {
     background-color: black;
+    font-weight: bold;
+  }
+
+  tr {
+    height: 42px !important; /* fuerza altura en todas las filas */
   }
 
   tr:nth-child(even) td { background-color: #282828; }
@@ -60,6 +64,7 @@
     padding: 4px 10px;
     transform: skew(-20deg);
     min-width: 36px;
+    line-height: 1;
   }
   .posicion-box span { display: inline-block; transform: skew(20deg); }
 
@@ -72,6 +77,7 @@
     padding: 4px 10px;
     transform: skew(-20deg);
     min-width: 36px;
+    line-height: 1;
   }
   .dorsal-box span { display: inline-block; transform: skew(20deg); }
 
@@ -82,8 +88,10 @@
 
   /* Logos de Marca */
   .marca img {
-    max-height: 38px; /* 42px fila - 2px arriba y 2px abajo */
-    height: auto;
+    height: 38px;
+    width: 38px;
+    max-height: 38px;
+    max-width: 38px;
     display: block;
     margin: 2px auto;
     object-fit: contain;
@@ -94,7 +102,7 @@
     th, td { padding: 0 6px; font-size: 12px; line-height: 20px; }
     .posicion-box, .dorsal-box { font-size: 16px; padding: 3px 8px; }
     td.puntos { font-size: 12px; }
-    .marca img { max-height: 20px; }
+    .marca img { height: 24px; width: 24px; }
     .equipo { min-width: 140px; }
   }
 </style>
@@ -139,13 +147,13 @@ fetch(url)
         const td = document.createElement("td");
         let value = cell ? cell.v : "";
 
-        // Cajas inclinadas y clases
+        // Cajas y estilos
         if (cols[i] === "Posición") td.innerHTML = `<div class="posicion-box"><span>${value}</span></div>`;
         else if (cols[i] === "#") td.innerHTML = `<div class="dorsal-box"><span>${value}</span></div>`;
         else if (cols[i] === "Piloto") td.className = "encabezado1", td.innerText = value;
         else if (cols[i] === "Puntos") td.className = "puntos", td.innerText = value;
         else if (cols[i] === "Equipo") td.className = "equipo", td.innerText = value;
-        else if (cols[i] === "Marca") td.innerHTML = `<img src="${value}" alt="Marca">`;
+        else if (cols[i] === "Marca") td.className = "marca", td.innerHTML = `<img src="${value}" alt="Marca">`;
         else td.innerText = value;
 
         tr.appendChild(td);
