@@ -24,31 +24,41 @@
     width: 100%;
   }
 
+  /* Botón modo básico/completo */
+  .toggle-btn {
+    display: block;
+    margin: 0 auto 10px auto;
+    padding: 8px 16px;
+    background-color: #DD0000;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .toggle-btn:hover { background-color: #ff2222; }
+
   table {
     border-collapse: collapse;
     width: 100%;
-    min-width: 800px;
-    table-layout: fixed; /* evita que se deformen las celdas */
+    table-layout: auto; /* permite que las columnas se ajusten automáticamente */
   }
 
   th, td {
     text-align: center;
     white-space: nowrap;
-    height: 42px;          /* altura fija */
-    max-height: 42px;
-    overflow: hidden;
+    height: 42px;
     padding: 0 10px;
-    vertical-align: middle; /* centra verticalmente */
+    vertical-align: middle;
+    overflow: hidden;
     box-sizing: border-box;
   }
 
   th {
     background-color: black;
     font-weight: bold;
-  }
-
-  tr {
-    height: 42px !important; /* fuerza altura en todas las filas */
   }
 
   tr:nth-child(even) td { background-color: #282828; }
@@ -83,32 +93,34 @@
 
   /* Estilos reutilizables */
   .encabezado1 { font-size: 14px; font-weight: bold; }
-  .equipo { min-width: 180px; font-size: 14px; }
-  td.puntos { font-size: 14px; font-weight: bold; }
-
-  /* Logos de Marca */
+  .equipo { min-width: 160px; font-size: 14px; }
+  td.puntos { font-size: 16px; font-weight: bold; } /* más grande */
   .marca img {
     height: 38px;
     width: 38px;
-    max-height: 38px;
-    max-width: 38px;
     display: block;
     margin: 2px auto;
     object-fit: contain;
+  }
+
+  /* Ocultar columnas */
+  .oculto {
+    display: none;
   }
 
   /* Responsive */
   @media (max-width: 768px) {
     th, td { padding: 0 6px; font-size: 12px; line-height: 20px; }
     .posicion-box, .dorsal-box { font-size: 16px; padding: 3px 8px; }
-    td.puntos { font-size: 12px; }
+    td.puntos { font-size: 14px; }
     .marca img { height: 24px; width: 24px; }
-    .equipo { min-width: 140px; }
+    .equipo { min-width: 120px; }
   }
 </style>
 </head>
 <body>
 <h1 class="encabezado1">Clasificación</h1>
+<button class="toggle-btn" id="toggleView">Básico</button>
 <div class="table-container">
   <table id="clasificacion"></table>
 </div>
@@ -117,6 +129,8 @@
 const sheetId = "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
 const sheetName = "Clas3";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+
+let modoCompleto = false; // estado inicial: básico
 
 fetch(url)
   .then(res => res.text())
@@ -133,7 +147,7 @@ fetch(url)
     cols.forEach(col => {
       const th = document.createElement("th");
       th.innerText = col;
-      th.className = "encabezado1";
+      th.className = "encabezado1 th-" + col.replace(/\s+/g, '');
       trHead.appendChild(th);
     });
     thead.appendChild(trHead);
@@ -145,15 +159,16 @@ fetch(url)
       const tr = document.createElement("tr");
       row.c.forEach((cell, i) => {
         const td = document.createElement("td");
+        const colName = cols[i];
+        td.classList.add("td-" + colName.replace(/\s+/g, ''));
         let value = cell ? cell.v : "";
 
-        // Cajas y estilos
-        if (cols[i] === "Posición") td.innerHTML = `<div class="posicion-box"><span>${value}</span></div>`;
-        else if (cols[i] === "#") td.innerHTML = `<div class="dorsal-box"><span>${value}</span></div>`;
-        else if (cols[i] === "Piloto") td.className = "encabezado1", td.innerText = value;
-        else if (cols[i] === "Puntos") td.className = "puntos", td.innerText = value;
-        else if (cols[i] === "Equipo") td.className = "equipo", td.innerText = value;
-        else if (cols[i] === "Marca") td.className = "marca", td.innerHTML = `<img src="${value}" alt="Marca">`;
+        if (colName === "Posición") td.innerHTML = `<div class="posicion-box"><span>${value}</span></div>`;
+        else if (colName === "#") td.innerHTML = `<div class="dorsal-box"><span>${value}</span></div>`;
+        else if (colName === "Piloto") td.className += " encabezado1", td.innerText = value;
+        else if (colName === "Puntos") td.className += " puntos", td.innerText = value;
+        else if (colName === "Equipo") td.className += " equipo", td.innerText = value;
+        else if (colName === "Marca") td.className += " marca", td.innerHTML = `<img src="${value}" alt="Marca">`;
         else td.innerText = value;
 
         tr.appendChild(td);
@@ -161,6 +176,19 @@ fetch(url)
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
+
+    // Botón para alternar vista básica/completa
+    document.getElementById("toggleView").addEventListener("click", () => {
+      modoCompleto = !modoCompleto;
+      const columnasOcultar = ["R1", "R2", "R3", "R4", "Pen"];
+      columnasOcultar.forEach(col => {
+        const th = document.querySelector(".th-" + col);
+        const tds = document.querySelectorAll(".td-" + col);
+        if (th) th.classList.toggle("oculto", !modoCompleto);
+        tds.forEach(td => td.classList.toggle("oculto", !modoCompleto));
+      });
+      document.getElementById("toggleView").innerText = modoCompleto ? "Completo" : "Básico";
+    });
   })
   .catch(err => console.error(err));
 </script>
