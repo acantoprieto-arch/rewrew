@@ -36,14 +36,17 @@
     font-size: 14px;
     font-weight: bold;
     cursor: pointer;
-    transition: 0.2s;
+    transition: background-color 0.2s, transform 0.2s;
   }
-  .toggle-btn:hover { background-color: #ff2222; }
+  .toggle-btn:hover {
+    background-color: #ff2222;
+    transform: scale(1.05);
+  }
 
   table {
     border-collapse: collapse;
     width: 100%;
-    table-layout: auto; /* permite que las columnas se ajusten automáticamente */
+    table-layout: auto;
   }
 
   th, td {
@@ -54,6 +57,7 @@
     vertical-align: middle;
     overflow: hidden;
     box-sizing: border-box;
+    transition: all 0.3s ease; /* transición suave */
   }
 
   th {
@@ -103,9 +107,14 @@
     object-fit: contain;
   }
 
-  /* Ocultar columnas */
+  /* --- Animación de ocultar columnas --- */
   .oculto {
-    display: none;
+    opacity: 0;
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
   }
 
   /* Responsive */
@@ -130,7 +139,7 @@ const sheetId = "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
 const sheetName = "Clas3";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
 
-let modoCompleto = false; // estado inicial: básico
+let modoCompleto = false; // empieza en modo básico
 
 fetch(url)
   .then(res => res.text())
@@ -178,7 +187,8 @@ fetch(url)
     table.appendChild(tbody);
 
     // Botón para alternar vista básica/completa
-    document.getElementById("toggleView").addEventListener("click", () => {
+    const toggleBtn = document.getElementById("toggleView");
+    toggleBtn.addEventListener("click", () => {
       modoCompleto = !modoCompleto;
       const columnasOcultar = ["R1", "R2", "R3", "R4", "Pen"];
       columnasOcultar.forEach(col => {
@@ -187,10 +197,13 @@ fetch(url)
         if (th) th.classList.toggle("oculto", !modoCompleto);
         tds.forEach(td => td.classList.toggle("oculto", !modoCompleto));
       });
-      document.getElementById("toggleView").innerText = modoCompleto ? "Completo" : "Básico";
+      toggleBtn.innerText = modoCompleto ? "Completo" : "Básico";
     });
-  })
-  .catch(err => console.error(err));
-</script>
-</body>
-</html>
+
+    // Inicialmente, ocultar columnas del modo básico
+    const columnasIniciales = ["R1", "R2", "R3", "R4", "Pen"];
+    columnasIniciales.forEach(col => {
+      const th = document.querySelector(".th-" + col);
+      const tds = document.querySelectorAll(".td-" + col);
+      if (th) th.classList.add("oculto");
+      t
