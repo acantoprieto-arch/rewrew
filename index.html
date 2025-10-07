@@ -16,90 +16,99 @@
   h1 {
     text-align: center;
     font-size: 14px;
-    margin-bottom: 10px;
-  }
-
-  .controls {
-    text-align: center;
-    margin-bottom: 10px;
-  }
-
-  .toggle-btn {
-    background-color: #DD0000;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
+    margin-bottom: 20px;
   }
 
   .table-container {
     overflow-x: auto;
-    width: 100%;
+    width: 100%; /* ocupa todo el ancho disponible */
   }
 
   table {
     border-collapse: collapse;
-    width: 100%;
-    table-layout: fixed;
+    width: 100%;          /* tabla se ajusta al ancho del contenedor */
+    table-layout: auto;   /* columnas se ajustan automáticamente */
   }
 
   th, td {
-    padding: 0 8px;
     text-align: center;
     white-space: nowrap;
     height: 42px;
-    line-height: 42px;
+    max-height: 42px;
     overflow: hidden;
-    box-sizing: border-box;
+    padding: 0 10px;
     vertical-align: middle;
+    box-sizing: border-box;
   }
 
   th {
     background-color: black;
+    font-weight: bold;
+  }
+
+  tr {
+    height: 42px !important; /* fuerza altura fija */
   }
 
   tr:nth-child(even) td { background-color: #282828; }
   tr:nth-child(odd) td { background-color: #1e1e1e; }
 
-  .encabezado1 { font-size: 14px; font-weight: bold; }
-  .estilo2 { font-size: 22px; font-weight: bold; color: white; background-color: #DD0000; }
-  .estilo3 { font-size: 14px; font-weight: bold; }
-  .estilo4 { font-size: 14px; font-weight: bold; background-color: white; color: black; text-decoration: none; }
-  .equipo { min-width: 180px; font-size: 14px; }
-  .resto { font-size: 14px; }
-
-  td.puntos {
-    font-size: 16px;
+  /* --- Cajas inclinadas --- */
+  .posicion-box {
+    display: inline-block;
+    background-color: #DD0000;
+    color: white;
     font-weight: bold;
+    font-size: 18px;
+    padding: 4px 10px;
+    transform: skew(-20deg);
+    min-width: 36px;
+    line-height: 1;
   }
+  .posicion-box span { display: inline-block; transform: skew(20deg); }
 
+  .dorsal-box {
+    display: inline-block;
+    background-color: #FFFFFF;
+    color: black;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 4px 10px;
+    transform: skew(-20deg);
+    min-width: 36px;
+    line-height: 1;
+  }
+  .dorsal-box span { display: inline-block; transform: skew(20deg); }
+
+  /* Estilos reutilizables */
+  .encabezado1 { font-size: 14px; font-weight: bold; }
+  .equipo { min-width: 180px; font-size: 14px; }
+  td.puntos { font-size: 16px; font-weight: bold; } /* un par de px más grande */
+
+  /* Logos de Marca */
   .marca img {
     height: 38px;
-    width: auto;
+    width: 38px;
+    max-height: 38px;
+    max-width: 38px;
     display: block;
     margin: 2px auto;
     object-fit: contain;
   }
 
+  /* Responsive */
   @media (max-width: 768px) {
-    th, td { padding: 0 6px; font-size: 12px; line-height: 38px; }
-    .estilo2 { font-size: 18px; }
-    .estilo3, .estilo4 { font-size: 12px; }
+    .table-container { width: 100%; }
+    th, td { padding: 0 6px; font-size: 12px; line-height: 20px; }
+    .posicion-box, .dorsal-box { font-size: 16px; padding: 3px 8px; }
     td.puntos { font-size: 14px; }
-    .marca img { height: 34px; }
+    .marca img { height: 24px; width: 24px; }
     .equipo { min-width: 140px; }
   }
 </style>
 </head>
 <body>
 <h1 class="encabezado1">Clasificación</h1>
-<div class="controls">
-  <button class="toggle-btn" id="toggleView">Básico</button>
-</div>
-
 <div class="table-container">
   <table id="clasificacion"></table>
 </div>
@@ -109,88 +118,51 @@ const sheetId = "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
 const sheetName = "Clas3";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
 
-let allCols = [];
-let hiddenCols = ["R1", "R2", "R3", "R4", "Pen"];
-let isBasic = true;
-
 fetch(url)
   .then(res => res.text())
   .then(data => {
-    // Intenta parsear el JSON, aunque cambie el formato
-    const jsonText = data.match(/google\.visualization\.Query\.setResponse\(([\s\S\w]+)\)/);
-    const json = JSON.parse(jsonText[1]);
-
-    allCols = json.table.cols.map(c => c.label);
+    const json = JSON.parse(data.substr(47).slice(0, -2));
+    const cols = json.table.cols.map(c => c.label);
     const rows = json.table.rows;
 
-    console.log("Columnas detectadas:", allCols); // debug
-
-    renderTable(allCols, rows);
-  })
-  .catch(err => {
-    console.error("Error cargando datos:", err);
     const table = document.getElementById("clasificacion");
-    table.innerHTML = "<tr><td>Error al cargar datos</td></tr>";
-  });
 
-function renderTable(cols, rows) {
-  const table = document.getElementById("clasificacion");
-  table.innerHTML = "";
-
-  const thead = document.createElement("thead");
-  const trHead = document.createElement("tr");
-  cols.forEach(col => {
-    const th = document.createElement("th");
-    th.innerText = col;
-    th.className = "encabezado1";
-    if (isBasic && hiddenCols.includes(col)) th.style.display = "none";
-    trHead.appendChild(th);
-  });
-  thead.appendChild(trHead);
-  table.appendChild(thead);
-
-  const tbody = document.createElement("tbody");
-  rows.forEach(row => {
-    const tr = document.createElement("tr");
-    row.c.forEach((cell, i) => {
-      const td = document.createElement("td");
-      let value = cell ? cell.v : "";
-
-      const colName = allCols[i];
-      if (isBasic && hiddenCols.includes(colName)) td.style.display = "none";
-
-      if (colName === "Posición") td.className = "estilo2";
-      else if (colName === "Piloto") td.className = "estilo3";
-      else if (colName === "Puntos") td.className = "estilo3 puntos";
-      else if (colName === "#") td.className = "estilo4";
-      else if (colName === "Equipo") td.className = "equipo";
-      else if (colName === "Marca") td.innerHTML = `<img src="${value}" alt="Marca">`;
-      else td.className = "resto";
-
-      if (!td.innerHTML) td.innerText = value;
-      tr.appendChild(td);
+    // Cabecera
+    const thead = document.createElement("thead");
+    const trHead = document.createElement("tr");
+    cols.forEach(col => {
+      const th = document.createElement("th");
+      th.innerText = col;
+      th.className = "encabezado1";
+      trHead.appendChild(th);
     });
-    tbody.appendChild(tr);
-  });
-  table.appendChild(tbody);
-}
+    thead.appendChild(trHead);
+    table.appendChild(thead);
 
-document.getElementById("toggleView").addEventListener("click", () => {
-  isBasic = !isBasic;
-  document.getElementById("toggleView").innerText = isBasic ? "Básico" : "Completo";
-  const table = document.getElementById("clasificacion");
-  const allRows = table.querySelectorAll("tr");
+    // Filas
+    const tbody = document.createElement("tbody");
+    rows.forEach(row => {
+      const tr = document.createElement("tr");
+      row.c.forEach((cell, i) => {
+        const td = document.createElement("td");
+        let value = cell ? cell.v : "";
 
-  allRows.forEach(tr => {
-    const cells = tr.querySelectorAll("th, td");
-    cells.forEach((cell, i) => {
-      const colName = allCols[i];
-      if (hiddenCols.includes(colName)) {
-        cell.style.display = isBasic ? "none" : "";
-      }
+        // Cajas y estilos
+        if (cols[i] === "Posición") td.innerHTML = `<div class="posicion-box"><span>${value}</span></div>`;
+        else if (cols[i] === "#") td.innerHTML = `<div class="dorsal-box"><span>${value}</span></div>`;
+        else if (cols[i] === "Piloto") td.className = "encabezado1", td.innerText = value;
+        else if (cols[i] === "Puntos") td.className = "puntos", td.innerText = value;
+        else if (cols[i] === "Equipo") td.className = "equipo", td.innerText = value;
+        else if (cols[i] === "Marca") td.className = "marca", td.innerHTML = `<img src="${value}" alt="Marca">`;
+        else td.innerText = value;
+
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
     });
-  });
-});
+    table.appendChild(tbody);
+  })
+  .catch(err => console.error(err));
 </script>
 </body>
 </html>
