@@ -16,7 +16,23 @@
   h1 {
     text-align: center;
     font-size: 14px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+  }
+
+  .controls {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .toggle-btn {
+    background-color: #DD0000;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
   }
 
   .table-container {
@@ -24,112 +40,66 @@
     width: 100%;
   }
 
-  /* Botón modo básico/completo */
-  .toggle-btn {
-    display: block;
-    margin: 0 auto 10px auto;
-    padding: 8px 16px;
-    background-color: #DD0000;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.2s;
-  }
-  .toggle-btn:hover {
-    background-color: #ff2222;
-    transform: scale(1.05);
-  }
-
   table {
     border-collapse: collapse;
     width: 100%;
-    table-layout: auto;
+    table-layout: fixed; /* evita que se corten columnas */
   }
 
   th, td {
+    padding: 0 8px;
     text-align: center;
     white-space: nowrap;
     height: 42px;
-    padding: 0 10px;
-    vertical-align: middle;
+    line-height: 42px;
     overflow: hidden;
     box-sizing: border-box;
-    transition: all 0.3s ease; /* transición suave */
+    vertical-align: middle;
   }
 
   th {
     background-color: black;
-    font-weight: bold;
   }
 
   tr:nth-child(even) td { background-color: #282828; }
   tr:nth-child(odd) td { background-color: #1e1e1e; }
 
-  /* --- Cajas inclinadas --- */
-  .posicion-box {
-    display: inline-block;
-    background-color: #DD0000;
-    color: white;
-    font-weight: bold;
-    font-size: 18px;
-    padding: 4px 10px;
-    transform: skew(-20deg);
-    min-width: 36px;
-    line-height: 1;
-  }
-  .posicion-box span { display: inline-block; transform: skew(20deg); }
-
-  .dorsal-box {
-    display: inline-block;
-    background-color: #FFFFFF;
-    color: black;
-    font-weight: bold;
-    font-size: 18px;
-    padding: 4px 10px;
-    transform: skew(-20deg);
-    min-width: 36px;
-    line-height: 1;
-  }
-  .dorsal-box span { display: inline-block; transform: skew(20deg); }
-
-  /* Estilos reutilizables */
   .encabezado1 { font-size: 14px; font-weight: bold; }
-  .equipo { min-width: 160px; font-size: 14px; }
-  td.puntos { font-size: 16px; font-weight: bold; } /* más grande */
+  .estilo2 { font-size: 22px; font-weight: bold; color: white; background-color: #DD0000; } /* Posición */
+  .estilo3 { font-size: 14px; font-weight: bold; } /* Piloto y otros */
+  .estilo4 { font-size: 14px; font-weight: bold; background-color: white; color: black; text-decoration: none; } /* # */
+  .equipo { min-width: 180px; font-size: 14px; }
+  .resto { font-size: 14px; }
+
+  td.puntos {
+    font-size: 16px; /* un poco más grande */
+    font-weight: bold;
+  }
+
   .marca img {
     height: 38px;
-    width: 38px;
+    width: auto;
     display: block;
     margin: 2px auto;
     object-fit: contain;
   }
 
-  /* --- Animación de ocultar columnas --- */
-  .oculto {
-    opacity: 0;
-    width: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: none !important;
-    overflow: hidden !important;
-  }
-
-  /* Responsive */
   @media (max-width: 768px) {
-    th, td { padding: 0 6px; font-size: 12px; line-height: 20px; }
-    .posicion-box, .dorsal-box { font-size: 16px; padding: 3px 8px; }
+    th, td { padding: 0 6px; font-size: 12px; line-height: 38px; }
+    .estilo2 { font-size: 18px; }
+    .estilo3, .estilo4 { font-size: 12px; }
     td.puntos { font-size: 14px; }
-    .marca img { height: 24px; width: 24px; }
-    .equipo { min-width: 120px; }
+    .marca img { height: 34px; }
+    .equipo { min-width: 140px; }
   }
 </style>
 </head>
 <body>
 <h1 class="encabezado1">Clasificación</h1>
-<button class="toggle-btn" id="toggleView">Básico</button>
+<div class="controls">
+  <button class="toggle-btn" id="toggleView">Básico</button>
+</div>
+
 <div class="table-container">
   <table id="clasificacion"></table>
 </div>
@@ -139,71 +109,82 @@ const sheetId = "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
 const sheetName = "Clas3";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
 
-let modoCompleto = false; // empieza en modo básico
+let allCols = [];
+let hiddenCols = ["R1", "R2", "R3", "R4", "Pen"];
+let isBasic = true;
 
 fetch(url)
   .then(res => res.text())
   .then(data => {
     const json = JSON.parse(data.substr(47).slice(0, -2));
-    const cols = json.table.cols.map(c => c.label);
+    allCols = json.table.cols.map(c => c.label);
     const rows = json.table.rows;
 
     const table = document.getElementById("clasificacion");
+    table.innerHTML = "";
 
-    // Cabecera
-    const thead = document.createElement("thead");
-    const trHead = document.createElement("tr");
-    cols.forEach(col => {
-      const th = document.createElement("th");
-      th.innerText = col;
-      th.className = "encabezado1 th-" + col.replace(/\s+/g, '');
-      trHead.appendChild(th);
+    renderTable(allCols, rows);
+  })
+  .catch(err => console.error(err));
+
+function renderTable(cols, rows) {
+  const table = document.getElementById("clasificacion");
+  table.innerHTML = "";
+
+  const thead = document.createElement("thead");
+  const trHead = document.createElement("tr");
+  cols.forEach(col => {
+    const th = document.createElement("th");
+    th.innerText = col;
+    th.className = "encabezado1";
+    if (isBasic && hiddenCols.includes(col)) th.style.display = "none";
+    trHead.appendChild(th);
+  });
+  thead.appendChild(trHead);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  rows.forEach(row => {
+    const tr = document.createElement("tr");
+    row.c.forEach((cell, i) => {
+      const td = document.createElement("td");
+      let value = cell ? cell.v : "";
+
+      const colName = allCols[i];
+      if (isBasic && hiddenCols.includes(colName)) td.style.display = "none";
+
+      if (colName === "Posición") td.className = "estilo2";
+      else if (colName === "Piloto") td.className = "estilo3";
+      else if (colName === "Puntos") td.className = "estilo3 puntos";
+      else if (colName === "#") td.className = "estilo4";
+      else if (colName === "Equipo") td.className = "equipo";
+      else if (colName === "Marca") td.innerHTML = `<img src="${value}" alt="Marca">`;
+      else td.className = "resto";
+
+      if (!td.innerHTML) td.innerText = value;
+      tr.appendChild(td);
     });
-    thead.appendChild(trHead);
-    table.appendChild(thead);
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+}
 
-    // Filas
-    const tbody = document.createElement("tbody");
-    rows.forEach(row => {
-      const tr = document.createElement("tr");
-      row.c.forEach((cell, i) => {
-        const td = document.createElement("td");
-        const colName = cols[i];
-        td.classList.add("td-" + colName.replace(/\s+/g, ''));
-        let value = cell ? cell.v : "";
+document.getElementById("toggleView").addEventListener("click", () => {
+  isBasic = !isBasic;
+  document.getElementById("toggleView").innerText = isBasic ? "Básico" : "Completo";
+  const table = document.getElementById("clasificacion");
+  const allRows = table.querySelectorAll("tr");
 
-        if (colName === "Posición") td.innerHTML = `<div class="posicion-box"><span>${value}</span></div>`;
-        else if (colName === "#") td.innerHTML = `<div class="dorsal-box"><span>${value}</span></div>`;
-        else if (colName === "Piloto") td.className += " encabezado1", td.innerText = value;
-        else if (colName === "Puntos") td.className += " puntos", td.innerText = value;
-        else if (colName === "Equipo") td.className += " equipo", td.innerText = value;
-        else if (colName === "Marca") td.className += " marca", td.innerHTML = `<img src="${value}" alt="Marca">`;
-        else td.innerText = value;
-
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
+  allRows.forEach(tr => {
+    const cells = tr.querySelectorAll("th, td");
+    cells.forEach((cell, i) => {
+      const colName = allCols[i];
+      if (hiddenCols.includes(colName)) {
+        cell.style.display = isBasic ? "none" : "";
+      }
     });
-    table.appendChild(tbody);
-
-    // Botón para alternar vista básica/completa
-    const toggleBtn = document.getElementById("toggleView");
-    toggleBtn.addEventListener("click", () => {
-      modoCompleto = !modoCompleto;
-      const columnasOcultar = ["R1", "R2", "R3", "R4", "Pen"];
-      columnasOcultar.forEach(col => {
-        const th = document.querySelector(".th-" + col);
-        const tds = document.querySelectorAll(".td-" + col);
-        if (th) th.classList.toggle("oculto", !modoCompleto);
-        tds.forEach(td => td.classList.toggle("oculto", !modoCompleto));
-      });
-      toggleBtn.innerText = modoCompleto ? "Completo" : "Básico";
-    });
-
-    // Inicialmente, ocultar columnas del modo básico
-    const columnasIniciales = ["R1", "R2", "R3", "R4", "Pen"];
-    columnasIniciales.forEach(col => {
-      const th = document.querySelector(".th-" + col);
-      const tds = document.querySelectorAll(".td-" + col);
-      if (th) th.classList.add("oculto");
-      t
+  });
+});
+</script>
+</body>
+</html>
