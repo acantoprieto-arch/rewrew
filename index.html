@@ -43,7 +43,7 @@
   table {
     border-collapse: collapse;
     width: 100%;
-    table-layout: fixed; /* evita que se corten columnas */
+    table-layout: fixed;
   }
 
   th, td {
@@ -65,14 +65,14 @@
   tr:nth-child(odd) td { background-color: #1e1e1e; }
 
   .encabezado1 { font-size: 14px; font-weight: bold; }
-  .estilo2 { font-size: 22px; font-weight: bold; color: white; background-color: #DD0000; } /* Posición */
-  .estilo3 { font-size: 14px; font-weight: bold; } /* Piloto y otros */
-  .estilo4 { font-size: 14px; font-weight: bold; background-color: white; color: black; text-decoration: none; } /* # */
+  .estilo2 { font-size: 22px; font-weight: bold; color: white; background-color: #DD0000; }
+  .estilo3 { font-size: 14px; font-weight: bold; }
+  .estilo4 { font-size: 14px; font-weight: bold; background-color: white; color: black; text-decoration: none; }
   .equipo { min-width: 180px; font-size: 14px; }
   .resto { font-size: 14px; }
 
   td.puntos {
-    font-size: 16px; /* un poco más grande */
+    font-size: 16px;
     font-weight: bold;
   }
 
@@ -116,16 +116,22 @@ let isBasic = true;
 fetch(url)
   .then(res => res.text())
   .then(data => {
-    const json = JSON.parse(data.substr(47).slice(0, -2));
+    // Intenta parsear el JSON, aunque cambie el formato
+    const jsonText = data.match(/google\.visualization\.Query\.setResponse\(([\s\S\w]+)\)/);
+    const json = JSON.parse(jsonText[1]);
+
     allCols = json.table.cols.map(c => c.label);
     const rows = json.table.rows;
 
-    const table = document.getElementById("clasificacion");
-    table.innerHTML = "";
+    console.log("Columnas detectadas:", allCols); // debug
 
     renderTable(allCols, rows);
   })
-  .catch(err => console.error(err));
+  .catch(err => {
+    console.error("Error cargando datos:", err);
+    const table = document.getElementById("clasificacion");
+    table.innerHTML = "<tr><td>Error al cargar datos</td></tr>";
+  });
 
 function renderTable(cols, rows) {
   const table = document.getElementById("clasificacion");
