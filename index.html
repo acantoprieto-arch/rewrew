@@ -21,13 +21,13 @@
 
   .table-container {
     overflow-x: auto;
-    width: 100%; /* ocupa todo el ancho disponible */
+    width: 100%;
   }
 
   table {
     border-collapse: collapse;
-    width: 100%;          /* tabla se ajusta al ancho del contenedor */
-    table-layout: auto;   /* columnas se ajustan automáticamente */
+    width: 100%;
+    table-layout: auto;
   }
 
   th, td {
@@ -47,7 +47,7 @@
   }
 
   tr {
-    height: 42px !important; /* fuerza altura fija */
+    height: 42px !important;
   }
 
   tr:nth-child(even) td { background-color: #282828; }
@@ -85,6 +85,10 @@
   .equipo { min-width: 180px; font-size: 14px; }
   td.puntos { font-size: 16px; font-weight: bold; } /* un par de px más grande */
 
+  /* ↓↓↓ NUEVO ↓↓↓ */
+  td.spec { font-size: 14px; } /* 2px más pequeño que el tamaño base */
+  /* ↑↑↑ NUEVO ↑↑↑ */
+
   /* Logos de Marca */
   .marca img {
     height: 38px;
@@ -102,6 +106,7 @@
     th, td { padding: 0 6px; font-size: 12px; line-height: 20px; }
     .posicion-box, .dorsal-box { font-size: 16px; padding: 3px 8px; }
     td.puntos { font-size: 14px; }
+    td.spec { font-size: 12px; } /* también se reduce en móvil */
     .marca img { height: 24px; width: 24px; }
     .equipo { min-width: 140px; }
   }
@@ -154,6 +159,7 @@ fetch(url)
         else if (cols[i] === "Puntos") td.className = "puntos", td.innerText = value;
         else if (cols[i] === "Equipo") td.className = "equipo", td.innerText = value;
         else if (cols[i] === "Marca") td.className = "marca", td.innerHTML = `<img src="${value}" alt="Marca">`;
+        else if (cols[i] === "Spec") td.className = "spec", td.innerText = value; /* NUEVO */
         else td.innerText = value;
 
         tr.appendChild(td);
