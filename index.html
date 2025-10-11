@@ -46,10 +46,7 @@
     font-weight: bold;
   }
 
-  tr {
-    height: 42px !important;
-  }
-
+  tr { height: 42px !important; }
   tr:nth-child(even) td { background-color: #282828; }
   tr:nth-child(odd) td { background-color: #1e1e1e; }
 
@@ -80,17 +77,32 @@
   }
   .dorsal-box span { display: inline-block; transform: skew(20deg); }
 
-  /* Estilos reutilizables */
-  .encabezado1 { font-size: 14px; font-weight: bold; }
-  .equipo { min-width: 180px; font-size: 14px; }
-  td.puntos { font-size: 16px; font-weight: bold; } /* un par de px más grande */
+  /* --- Estilos por columna --- */
+  td.posicion { font-size: 18px; font-weight: bold; }
+  td.dorsal { font-size: 18px; font-weight: bold; }
 
-  /* ↓↓↓ NUEVO ↓↓↓ */
-  td.spec { font-size: 14px; } /* 2px más pequeño que el tamaño base */
-  /* ↑↑↑ NUEVO ↑↑↑ */
+  /* Todos los demás datos */
+  td.clase,
+  td.piloto,
+  td.equipo,
+  td.marca,
+  td.spec,
+  td.r1,
+  td.r2,
+  td.r3,
+  td.r4,
+  td.puntos,
+  td.pen {
+    font-size: 14px;
+  }
 
-  /* Logos de Marca */
-  .marca img {
+  td.piloto { font-weight: 600; }
+  td.puntos { font-weight: bold; }
+  td.pen { color: #f5a623; }
+
+  td.equipo { min-width: 180px; }
+
+  td.marca img {
     height: 38px;
     width: 38px;
     max-height: 38px;
@@ -102,18 +114,15 @@
 
   /* Responsive */
   @media (max-width: 768px) {
-    .table-container { width: 100%; }
     th, td { padding: 0 6px; font-size: 12px; line-height: 20px; }
     .posicion-box, .dorsal-box { font-size: 16px; padding: 3px 8px; }
-    td.puntos { font-size: 14px; }
-    td.spec { font-size: 12px; } /* también se reduce en móvil */
-    .marca img { height: 24px; width: 24px; }
-    .equipo { min-width: 140px; }
+    td.equipo { min-width: 140px; }
+    td.marca img { height: 24px; width: 24px; }
   }
 </style>
 </head>
 <body>
-<h1 class="encabezado1">Clasificación</h1>
+<h1>Clasificación</h1>
 <div class="table-container">
   <table id="clasificacion"></table>
 </div>
@@ -138,7 +147,6 @@ fetch(url)
     cols.forEach(col => {
       const th = document.createElement("th");
       th.innerText = col;
-      th.className = "encabezado1";
       trHead.appendChild(th);
     });
     thead.appendChild(trHead);
@@ -151,15 +159,26 @@ fetch(url)
       row.c.forEach((cell, i) => {
         const td = document.createElement("td");
         let value = cell ? cell.v : "";
+        const colName = cols[i];
 
-        // Cajas y estilos
-        if (cols[i] === "Posición") td.innerHTML = `<div class="posicion-box"><span>${value}</span></div>`;
-        else if (cols[i] === "#") td.innerHTML = `<div class="dorsal-box"><span>${value}</span></div>`;
-        else if (cols[i] === "Piloto") td.className = "encabezado1", td.innerText = value;
-        else if (cols[i] === "Puntos") td.className = "puntos", td.innerText = value;
-        else if (cols[i] === "Equipo") td.className = "equipo", td.innerText = value;
-        else if (cols[i] === "Marca") td.className = "marca", td.innerHTML = `<img src="${value}" alt="Marca">`;
-        else if (cols[i] === "Spec") td.className = "spec", td.innerText = value; /* NUEVO */
+        // Asignar estilos según columna
+        if (colName === "Posición") {
+          td.innerHTML = `<div class="posicion-box"><span>${value}</span></div>`;
+          td.className = "posicion";
+        } else if (colName === "#") {
+          td.innerHTML = `<div class="dorsal-box"><span>${value}</span></div>`;
+          td.className = "dorsal";
+        } else if (colName === "Clase") td.className = "clase", td.innerText = value;
+        else if (colName === "Piloto") td.className = "piloto", td.innerText = value;
+        else if (colName === "Equipo") td.className = "equipo", td.innerText = value;
+        else if (colName === "Marca") td.className = "marca", td.innerHTML = `<img src="${value}" alt="Marca">`;
+        else if (colName === "Spec") td.className = "spec", td.innerText = value;
+        else if (colName === "R1") td.className = "r1", td.innerText = value;
+        else if (colName === "R2") td.className = "r2", td.innerText = value;
+        else if (colName === "R3") td.className = "r3", td.innerText = value;
+        else if (colName === "R4") td.className = "r4", td.innerText = value;
+        else if (colName === "Puntos") td.className = "puntos", td.innerText = value;
+        else if (colName === "Pen") td.className = "pen", td.innerText = value;
         else td.innerText = value;
 
         tr.appendChild(td);
