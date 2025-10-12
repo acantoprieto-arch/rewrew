@@ -137,6 +137,48 @@
 
     table { min-width: 900px; }
   }
+
+  /* --- NUEVO: Columnas fijas adicionales solo en móvil --- */
+  @media (max-width: 768px) {
+    .table-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+    }
+
+    table {
+      min-width: 900px;
+      border-collapse: collapse;
+    }
+
+    /* Posición */
+    th:nth-child(1),
+    td:nth-child(1) {
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      background-color: #1e1e1e;
+    }
+
+    /* Clase */
+    th:nth-child(3),
+    td:nth-child(3) {
+      position: sticky;
+      left: 70px;
+      z-index: 5;
+      background-color: #1e1e1e;
+    }
+
+    /* Piloto */
+    th:nth-child(4),
+    td:nth-child(4) {
+      position: sticky;
+      left: 150px;
+      z-index: 5;
+      background-color: #1e1e1e;
+      border-right: 2px solid #333;
+    }
+  }
 </style>
 </head>
 <body>
