@@ -1,215 +1,318 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Clasificación</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      background-color: #1e1e1e;
-      font-family: 'Montserrat', sans-serif;
-      color: white;
-      margin: 0;
-      padding: 20px;
-      overflow: hidden;
-    }
+<meta charset="UTF-8">
+<title>Clasificación</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body {
+    background-color: #1e1e1e;
+    font-family: 'Montserrat', sans-serif;
+    color: white;
+    margin: 0;
+    padding: 20px;
+  }
 
-    h1 {
-      text-align: center;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
+  h1 {
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: auto;
+    background: transparent;
+  }
+
+  th, td {
+    text-align: center;
+    white-space: nowrap;
+    height: 42px;
+    padding: 0 10px;
+    vertical-align: middle;
+    box-sizing: border-box;
+    min-width: 40px;
+  }
+
+  th {
+    background-color: black;
+    font-weight: bold;
+    z-index: 5;
+  }
+
+  tr:nth-child(even) td { background-color: #282828; }
+  tr:nth-child(odd) td { background-color: #1e1e1e; }
+
+  /* --- Cajas inclinadas --- */
+  .posicion-box {
+    display: inline-block;
+    background-color: #DD0000;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 4px 10px;
+    transform: skew(-20deg);
+    min-width: 36px;
+    line-height: 1;
+  }
+  .posicion-box span { display: inline-block; transform: skew(20deg); }
+
+  .dorsal-box {
+    display: inline-block;
+    background-color: #FFFFFF;
+    color: black;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 4px 10px;
+    transform: skew(-20deg);
+    min-width: 36px;
+    line-height: 1;
+  }
+  .dorsal-box span { display: inline-block; transform: skew(20deg); }
+
+  /* --- Tamaños unificados --- */
+  td {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  td.posicion,
+  td.dorsal {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  td.piloto { font-weight: 600; }
+  td.puntos { font-weight: bold; }
+  td.pen { color: #ffffff; }
+
+  td.equipo { min-width: 180px; }
+  td.marca img {
+    height: 38px;
+    width: 38px;
+    display: block;
+    margin: 2px auto;
+    object-fit: contain;
+  }
+
+  /* --- Estilos para columnas que vamos a fijar (se activan en JS) --- */
+  .sticky-col {
+    position: sticky;
+    left: 0; /* left real será puesto en línea por JS */
+    z-index: 6;
+    background-color: #1e1e1e;
+  }
+  .sticky-col.th {
+    z-index: 8; /* encabezados por encima de las celdas */
+    background-color: black; /* hace que la cabecera pegada se vea igual que otras cabeceras */
+    color: white;
+  }
+  /* borde separador a la derecha de la última columna fija */
+  .sticky-separator {
+    border-right: 2px solid #333;
+  }
+
+  /* --- Responsive (solo en móvil aplicamos el sticky) --- */
+  @media (max-width: 768px) {
+    th, td { padding: 0 6px; font-size: 12px; line-height: 20px; }
+    .posicion-box, .dorsal-box { font-size: 16px; padding: 3px 8px; }
+    td.equipo { min-width: 140px; }
+    td.marca img { height: 24px; width: 24px; }
 
     .table-container {
       overflow-x: auto;
-      width: 100%;
-      height: auto;
-      transition: all 0.3s ease;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
     }
 
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      table-layout: auto;
+    table { min-width: 900px; }
+  }
+
+  /* en pantallas mayores no aplicamos sticky */
+  @media (min-width: 769px) {
+    .sticky-col,
+    .sticky-col.th {
+      position: static !important;
+      left: auto !important;
+      border-right: none !important;
     }
-
-    th, td {
-      text-align: center;
-      white-space: nowrap;
-      height: 42px;
-      padding: 0 10px;
-      vertical-align: middle;
-      box-sizing: border-box;
-    }
-
-    th {
-      background-color: black;
-      font-weight: bold;
-      z-index: 5;
-    }
-
-    tr:nth-child(even) td { background-color: #282828; }
-    tr:nth-child(odd) td { background-color: #1e1e1e; }
-
-    /* --- Cajas inclinadas --- */
-    .posicion-box, .dorsal-box {
-      display: inline-block;
-      color: white;
-      font-weight: bold;
-      font-size: 18px;
-      padding: 4px 10px;
-      transform: skew(-20deg);
-      min-width: 36px;
-      line-height: 1;
-    }
-    .posicion-box { background-color: #DD0000; }
-    .dorsal-box { background-color: #FFFFFF; color: black; }
-    .posicion-box span, .dorsal-box span { display: inline-block; transform: skew(20deg); }
-
-    /* --- Tamaños unificados --- */
-    td { font-size: 14px; line-height: 1.2; }
-    td.posicion, td.dorsal { font-size: 18px; font-weight: bold; }
-    td.piloto { font-weight: 600; }
-    td.puntos { font-weight: bold; }
-    td.pen { color: #ffffff; }
-    td.equipo { min-width: 180px; }
-    td.marca img {
-      height: 38px;
-      width: 38px;
-      display: block;
-      margin: 2px auto;
-      object-fit: contain;
-    }
-
-    /* --- Responsive --- */
-    @media (max-width: 768px) {
-      th, td {
-        padding: 0 6px;
-        font-size: 12px;
-        line-height: 20px;
-      }
-
-      .posicion-box, .dorsal-box {
-        font-size: 16px;
-        padding: 3px 8px;
-      }
-
-      td.equipo { min-width: 140px; }
-      td.marca img { height: 24px; width: 24px; }
-
-      .table-container {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        position: relative;
-      }
-
-      /* Columnas fijas */
-      th:nth-child(1), td:nth-child(1) {
-        position: sticky;
-        left: 0;
-        z-index: 3;
-        background-color: #1e1e1e;
-      }
-      th:nth-child(2), td:nth-child(2) {
-        position: sticky;
-        left: 70px;
-        z-index: 3;
-        background-color: #1e1e1e;
-      }
-      th:nth-child(3), td:nth-child(3) {
-        position: sticky;
-        left: 140px;
-        z-index: 3;
-        background-color: #1e1e1e;
-      }
-
-      table { min-width: 900px; }
-    }
-
-    /* Estilos dinámicos controlados por JS */
-    .portrait-mode .table-container {
-      height: 100vh;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    .landscape-mode .table-container {
-      width: 100vw;
-      overflow-x: auto;
-      overflow-y: hidden;
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <h1>Clasificación</h1>
-  <div class="table-container">
-    <table id="clasificacion"></table>
-  </div>
+<h1>Clasificación</h1>
+<div class="table-container">
+  <table id="clasificacion"></table>
+</div>
 
-  <script>
-    const sheetId = "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
-    const sheetName = "Clas3";
-    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+<script>
+/**
+ * Función que pone sticky en las columnas cuyos nombres se pasan en `names`.
+ * Detecta las posiciones reales de las columnas por el texto del header.
+ * Calcula left acumulado usando offsetWidth para que siempre encaje.
+ */
+function applyStickyByHeaderNames(tableEl, names = ["Posición","Clase","Piloto"]) {
+  if (!tableEl) return;
+  const thead = tableEl.querySelector("thead");
+  if (!thead) return;
+  const ths = Array.from(thead.querySelectorAll("th"));
 
-    fetch(url)
-      .then(res => res.text())
-      .then(data => {
-        const json = JSON.parse(data.substr(47).slice(0, -2));
-        const cols = json.table.cols.map(c => c.label);
-        const rows = json.table.rows;
-        const table = document.getElementById("clasificacion");
+  // normaliza nombres para comparación (sin mayúsculas/espacios redundantes)
+  const normalize = s => (s||"").toString().trim().toLowerCase();
 
-        const thead = document.createElement("thead");
-        const trHead = document.createElement("tr");
-        cols.forEach(col => {
-          const th = document.createElement("th");
-          th.innerText = col;
-          trHead.appendChild(th);
-        });
-        thead.appendChild(trHead);
-        table.appendChild(thead);
+  // mapa headerText -> index
+  const headerMap = ths.map((th, i) => ({ text: normalize(th.textContent), index: i, el: th }));
 
-        const tbody = document.createElement("tbody");
-        rows.forEach(row => {
-          const tr = document.createElement("tr");
-          row.c.forEach((cell, i) => {
-            const td = document.createElement("td");
-            let value = cell ? cell.v : "";
-            const colName = cols[i];
+  // buscar los índices de las columnas que queremos fijar (en el orden solicitado)
+  const targetIndices = [];
+  names.forEach(name => {
+    const n = normalize(name);
+    const found = headerMap.find(h => h.text === n);
+    if (found) targetIndices.push(found.index);
+  });
 
-            if (colName === "Posición") {
-              td.innerHTML = `<div class="posicion-box"><span>${value}</span></div>`;
-              td.className = "posicion";
-            } else if (colName === "#") {
-              td.innerHTML = `<div class="dorsal-box"><span>${value}</span></div>`;
-              td.className = "dorsal";
-            } else if (colName === "Marca") {
-              td.className = "marca";
-              td.innerHTML = `<img src="${value}" alt="Marca">`;
-            } else {
-              td.className = colName.toLowerCase();
-              td.innerText = value;
-            }
+  if (targetIndices.length === 0) return; // nada que hacer
 
-            tr.appendChild(td);
-          });
-          tbody.appendChild(tr);
-        });
-        table.appendChild(tbody);
-      })
-      .catch(err => console.error(err));
+  // asegurarnos de que estén en orden ascendente
+  targetIndices.sort((a,b)=>a-b);
 
-    // --- 🔁 Detectar orientación y aplicar clase ---
-    function ajustarOrientacion() {
-      const esPortrait = window.matchMedia("(orientation: portrait)").matches;
-      document.body.classList.toggle("portrait-mode", esPortrait);
-      document.body.classList.toggle("landscape-mode", !esPortrait);
+  // añadir clases a th y a cada td de esa columna
+  const tbody = tableEl.querySelector("tbody");
+  const rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
+
+  targetIndices.forEach((colIndex, idx) => {
+    // th
+    const th = ths[colIndex];
+    if (th) {
+      th.classList.add("sticky-col","th");
     }
 
-    window.addEventListener("resize", ajustarOrientacion);
-    window.addEventListener("orientationchange", ajustarOrientacion);
-    ajustarOrientacion(); // Ejecutar al cargar
-  </script>
+    // todas las celdas td en esa columna
+    rows.forEach(row => {
+      const cells = Array.from(row.children);
+      const td = cells[colIndex];
+      if (td) td.classList.add("sticky-col");
+    });
+  });
+
+  // calcular left acumulado usando el offsetWidth de las columnas sticky
+  // IMPORTANT: hay que recalc cuando la tabla se redimensione -> lo hacemos ahora y en resize
+  function recalcLefts() {
+    // obtener ancho actual de cada columna (usando el th si existe, si no, el primer td)
+    const widths = targetIndices.map(i => {
+      const th = ths[i];
+      if (th && th.offsetWidth > 0) return th.offsetWidth;
+      // fallback: medir una celda
+      const firstRow = rows[0];
+      if (firstRow) {
+        const cell = firstRow.children[i];
+        if (cell) return cell.offsetWidth;
+      }
+      return 0;
+    });
+
+    // aplicar left acumulado
+    let acc = 0;
+    targetIndices.forEach((colIndex, idx) => {
+      const left = acc;
+      const th = ths[colIndex];
+      if (th) th.style.left = left + "px";
+      rows.forEach(row => {
+        const cell = row.children[colIndex];
+        if (cell) cell.style.left = left + "px";
+      });
+
+      // si es la última sticky, añade clase separador para bordear
+      if (idx === targetIndices.length - 1) {
+        if (th) th.classList.add("sticky-separator");
+        rows.forEach(row => {
+          const cell = row.children[colIndex];
+          if (cell) cell.classList.add("sticky-separator");
+        });
+      }
+
+      acc += widths[idx];
+    });
+  }
+
+  // recalcular ahora y cuando cambie tamaño de ventana / orientation
+  recalcLefts();
+  // usar debounce ligero
+  let t;
+  window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(recalcLefts, 120); });
+  window.addEventListener('orientationchange', () => { setTimeout(recalcLefts, 200); });
+}
+
+/* ----------------- tu fetch y creación de tabla (sin tocar) ----------------- */
+const sheetId = "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
+const sheetName = "Clas3";
+const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+
+fetch(url)
+  .then(res => res.text())
+  .then(data => {
+    const json = JSON.parse(data.substr(47).slice(0, -2));
+    const cols = json.table.cols.map(c => c.label);
+    const rows = json.table.rows;
+
+    const table = document.getElementById("clasificacion");
+
+    const thead = document.createElement("thead");
+    const trHead = document.createElement("tr");
+    cols.forEach(col => {
+      const th = document.createElement("th");
+      th.innerText = col;
+      trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    rows.forEach(row => {
+      const tr = document.createElement("tr");
+      row.c.forEach((cell, i) => {
+        const td = document.createElement("td");
+        let value = cell ? cell.v : "";
+        const colName = cols[i];
+
+        if (colName === "Posición") {
+          td.innerHTML = `<div class="posicion-box"><span>${value}</span></div>`;
+          td.className = "posicion";
+        } else if (colName === "#") {
+          td.innerHTML = `<div class="dorsal-box"><span>${value}</span></div>`;
+          td.className = "dorsal";
+        } else if (colName === "Clase") td.className = "clase", td.innerText = value;
+        else if (colName === "Piloto") td.className = "piloto", td.innerText = value;
+        else if (colName === "Equipo") td.className = "equipo", td.innerText = value;
+        else if (colName === "Marca") td.className = "marca", td.innerHTML = `<img src="${value}" alt="Marca">`;
+        else if (colName === "Spec") td.className = "spec", td.innerText = value;
+        else if (colName === "COTA") td.className = "cota", td.innerText = value;
+        else if (colName === "INTE") td.className = "inte", td.innerText = value;
+        else if (colName === "BAHR") td.className = "bahr", td.innerText = value;
+        else if (colName === "FUJI") td.className = "fuji", td.innerText = value;
+        else if (colName === "Puntos") td.className = "puntos", td.innerText = value;
+        else if (colName === "Pen") td.className = "pen", td.innerText = value;
+        else td.innerText = value;
+
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    // ---------- AQUÍ activamos el sticky dinámico (solo en mobile, ver CSS) ----------
+    // Ajusta los nombres si tus headers están en otro idioma o con otra ortografía.
+    applyStickyByHeaderNames(table, ["Posición", "Clase", "Piloto"]);
+  })
+  .catch(err => console.error(err));
+</script>
 </body>
 </html>
