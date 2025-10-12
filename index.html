@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Clasificación</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
   body {
     background-color: #1e1e1e;
@@ -28,6 +29,7 @@
     border-collapse: collapse;
     width: 100%;
     table-layout: auto;
+    background: transparent;
   }
 
   th, td {
@@ -37,6 +39,7 @@
     padding: 0 10px;
     vertical-align: middle;
     box-sizing: border-box;
+    min-width: 40px;
   }
 
   th {
@@ -100,7 +103,24 @@
     object-fit: contain;
   }
 
-  /* --- Responsive con columnas fijas --- */
+  /* --- Estilos para columnas que vamos a fijar (se activan en JS) --- */
+  .sticky-col {
+    position: sticky;
+    left: 0; /* left real será puesto en línea por JS */
+    z-index: 6;
+    background-color: #1e1e1e;
+  }
+  .sticky-col.th {
+    z-index: 8; /* encabezados por encima de las celdas */
+    background-color: black; /* hace que la cabecera pegada se vea igual que otras cabeceras */
+    color: white;
+  }
+  /* borde separador a la derecha de la última columna fija */
+  .sticky-separator {
+    border-right: 2px solid #333;
+  }
+
+  /* --- Responsive (solo en móvil aplicamos el sticky) --- */
   @media (max-width: 768px) {
     th, td { padding: 0 6px; font-size: 12px; line-height: 20px; }
     .posicion-box, .dorsal-box { font-size: 16px; padding: 3px 8px; }
@@ -113,70 +133,16 @@
       position: relative;
     }
 
-    /* Columnas fijas */
-    th:nth-child(1), td:nth-child(1) {
-      position: sticky;
-      left: 0;
-      z-index: 3;
-      background-color: #1e1e1e;
-    }
-
-    th:nth-child(2), td:nth-child(2) {
-      position: sticky;
-      left: 70px;
-      z-index: 3;
-      background-color: #1e1e1e;
-    }
-
-    th:nth-child(3), td:nth-child(3) {
-      position: sticky;
-      left: 140px;
-      z-index: 3;
-      background-color: #1e1e1e;
-    }
-
     table { min-width: 900px; }
   }
 
-  /* --- NUEVO: Columnas fijas adicionales solo en móvil --- */
-  @media (max-width: 768px) {
-    .table-container {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      position: relative;
-    }
-
-    table {
-      min-width: 900px;
-      border-collapse: collapse;
-    }
-
-    /* Posición */
-    th:nth-child(1),
-    td:nth-child(1) {
-      position: sticky;
-      left: 0;
-      z-index: 5;
-      background-color: #1e1e1e;
-    }
-
-    /* Clase */
-    th:nth-child(3),
-    td:nth-child(3) {
-      position: sticky;
-      left: 70px;
-      z-index: 5;
-      background-color: #1e1e1e;
-    }
-
-    /* Piloto */
-    th:nth-child(4),
-    td:nth-child(4) {
-      position: sticky;
-      left: 150px;
-      z-index: 5;
-      background-color: #1e1e1e;
-      border-right: 2px solid #333;
+  /* en pantallas mayores no aplicamos sticky */
+  @media (min-width: 769px) {
+    .sticky-col,
+    .sticky-col.th {
+      position: static !important;
+      left: auto !important;
+      border-right: none !important;
     }
   }
 </style>
@@ -188,6 +154,104 @@
 </div>
 
 <script>
+/**
+ * Función que pone sticky en las columnas cuyos nombres se pasan en `names`.
+ * Detecta las posiciones reales de las columnas por el texto del header.
+ * Calcula left acumulado usando offsetWidth para que siempre encaje.
+ */
+function applyStickyByHeaderNames(tableEl, names = ["Posición","Clase","Piloto"]) {
+  if (!tableEl) return;
+  const thead = tableEl.querySelector("thead");
+  if (!thead) return;
+  const ths = Array.from(thead.querySelectorAll("th"));
+
+  // normaliza nombres para comparación (sin mayúsculas/espacios redundantes)
+  const normalize = s => (s||"").toString().trim().toLowerCase();
+
+  // mapa headerText -> index
+  const headerMap = ths.map((th, i) => ({ text: normalize(th.textContent), index: i, el: th }));
+
+  // buscar los índices de las columnas que queremos fijar (en el orden solicitado)
+  const targetIndices = [];
+  names.forEach(name => {
+    const n = normalize(name);
+    const found = headerMap.find(h => h.text === n);
+    if (found) targetIndices.push(found.index);
+  });
+
+  if (targetIndices.length === 0) return; // nada que hacer
+
+  // asegurarnos de que estén en orden ascendente
+  targetIndices.sort((a,b)=>a-b);
+
+  // añadir clases a th y a cada td de esa columna
+  const tbody = tableEl.querySelector("tbody");
+  const rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
+
+  targetIndices.forEach((colIndex, idx) => {
+    // th
+    const th = ths[colIndex];
+    if (th) {
+      th.classList.add("sticky-col","th");
+    }
+
+    // todas las celdas td en esa columna
+    rows.forEach(row => {
+      const cells = Array.from(row.children);
+      const td = cells[colIndex];
+      if (td) td.classList.add("sticky-col");
+    });
+  });
+
+  // calcular left acumulado usando el offsetWidth de las columnas sticky
+  // IMPORTANT: hay que recalc cuando la tabla se redimensione -> lo hacemos ahora y en resize
+  function recalcLefts() {
+    // obtener ancho actual de cada columna (usando el th si existe, si no, el primer td)
+    const widths = targetIndices.map(i => {
+      const th = ths[i];
+      if (th && th.offsetWidth > 0) return th.offsetWidth;
+      // fallback: medir una celda
+      const firstRow = rows[0];
+      if (firstRow) {
+        const cell = firstRow.children[i];
+        if (cell) return cell.offsetWidth;
+      }
+      return 0;
+    });
+
+    // aplicar left acumulado
+    let acc = 0;
+    targetIndices.forEach((colIndex, idx) => {
+      const left = acc;
+      const th = ths[colIndex];
+      if (th) th.style.left = left + "px";
+      rows.forEach(row => {
+        const cell = row.children[colIndex];
+        if (cell) cell.style.left = left + "px";
+      });
+
+      // si es la última sticky, añade clase separador para bordear
+      if (idx === targetIndices.length - 1) {
+        if (th) th.classList.add("sticky-separator");
+        rows.forEach(row => {
+          const cell = row.children[colIndex];
+          if (cell) cell.classList.add("sticky-separator");
+        });
+      }
+
+      acc += widths[idx];
+    });
+  }
+
+  // recalcular ahora y cuando cambie tamaño de ventana / orientation
+  recalcLefts();
+  // usar debounce ligero
+  let t;
+  window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(recalcLefts, 120); });
+  window.addEventListener('orientationchange', () => { setTimeout(recalcLefts, 200); });
+}
+
+/* ----------------- tu fetch y creación de tabla (sin tocar) ----------------- */
 const sheetId = "1Jx8AvjYbslVL7zNIGkf58-4Pysbvjl0SWdD6XxkOlL8";
 const sheetName = "Clas3";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
@@ -243,6 +307,10 @@ fetch(url)
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
+
+    // ---------- AQUÍ activamos el sticky dinámico (solo en mobile, ver CSS) ----------
+    // Ajusta los nombres si tus headers están en otro idioma o con otra ortografía.
+    applyStickyByHeaderNames(table, ["Posición", "Clase", "Piloto"]);
   })
   .catch(err => console.error(err));
 </script>
