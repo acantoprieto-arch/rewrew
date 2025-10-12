@@ -55,8 +55,7 @@
   td.equipo { min-width: 180px; }
   td.marca img { height: 38px; width: 38px; display: block; margin: 2px auto; object-fit: contain; }
 
-  /* Columna extra muy estrecha */
-  td.extra-col { width: 20px; padding: 0; }
+  td.extra-col { width: 20px; padding: 0; vertical-align: middle; }
 
   @media (max-width: 768px) {
     th, td { padding: 0 6px; font-size: 12px; line-height: 20px; }
@@ -91,7 +90,7 @@ fetch(url)
   .then(res => res.text())
   .then(data => {
     const json = JSON.parse(data.substr(47).slice(0, -2));
-    const cols = ["Posición","Piloto","#","Equipo","Marca","Espec.","VRat"];
+    const cols = ["Posición","Extra","Piloto","#","Equipo","Marca","Espec.","VRat"];
     const rows = json.table.rows;
 
     const table = document.getElementById("clasificacion");
@@ -101,19 +100,11 @@ fetch(url)
     const trHead = document.createElement("tr");
     cols.forEach(col => {
       const th = document.createElement("th");
-      if(col==="Posición"){
-        th.innerText=col;
-        trHead.appendChild(th);
-        const extraTh = document.createElement("th"); // columna extra
-        extraTh.innerText="";
-        trHead.appendChild(extraTh);
-        return;
-      }
-      th.innerText=col;
+      th.innerText = col === "Extra" ? "" : col; // columna extra sin texto
       trHead.appendChild(th);
     });
-    table.appendChild(thead);
     thead.appendChild(trHead);
+    table.appendChild(thead);
 
     // Filas
     const tbody = document.createElement("tbody");
@@ -124,6 +115,14 @@ fetch(url)
         let value = row.c[i] ? row.c[i].v : "";
 
         if(colName==="Posición"){ td.innerHTML=`<div class="posicion-box"><span>${value}</span></div>`; td.className="posicion"; }
+        else if(colName==="Extra"){ 
+          td.className="extra-col"; 
+          if(rowIndex < 18){ 
+            td.innerHTML = `<span style="display:inline-block;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:10px solid #00FF00;"></span>`;
+          } else { 
+            td.innerHTML = `<div style="width:12px;height:6px;background-color:#888;margin:0 auto;border-radius:2px;"></div>`;
+          }
+        }
         else if(colName==="#"){ td.innerHTML=`<div class="dorsal-box"><span>${value}</span></div>`; td.className="dorsal"; }
         else if(colName==="Piloto"){ td.className="piloto"; td.innerText=value; }
         else if(colName==="Equipo"){ td.className="equipo"; td.innerText=value; }
@@ -133,17 +132,6 @@ fetch(url)
 
         tr.appendChild(td);
       });
-
-      // Columna extra estrecha entre Posición y Piloto
-      const extraTd = document.createElement("td");
-      extraTd.className = "extra-col";
-      if(rowIndex < 18){ // triángulo verde
-        extraTd.innerHTML = `<span style="display:inline-block;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:10px solid #00FF00;"></span>`;
-      } else { // rectángulo gris
-        extraTd.innerHTML = `<div style="width:12px;height:6px;background-color:#888;margin:0 auto;border-radius:2px;"></div>`;
-      }
-      tr.insertBefore(extraTd, tr.children[1]);
-
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
