@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Clasificación</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -12,21 +11,17 @@
     color: white;
     margin: 0;
     padding: 20px;
-    overflow: hidden;
   }
 
   h1 {
     text-align: center;
     font-size: 14px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
   }
 
   .table-container {
     overflow-x: auto;
-    overflow-y: auto;
     width: 100%;
-    height: auto;
-    max-height: 80vh;
   }
 
   table {
@@ -42,8 +37,6 @@
     padding: 0 10px;
     vertical-align: middle;
     box-sizing: border-box;
-    font-size: 14px;
-    line-height: 1.2;
   }
 
   th {
@@ -82,7 +75,12 @@
   }
   .dorsal-box span { display: inline-block; transform: skew(20deg); }
 
-  /* Tamaños */
+  /* --- Tamaños unificados --- */
+  td {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
   td.posicion,
   td.dorsal {
     font-size: 18px;
@@ -102,60 +100,42 @@
     object-fit: contain;
   }
 
-  /* --- Responsive Portrait --- */
-  @media (max-width: 768px) and (orientation: portrait) {
-    body { padding: 10px; overflow: hidden; }
-    .table-container {
-      height: 100vh; /* ocupa todo el alto del móvil */
-      max-height: 100vh;
-      overflow-y: scroll;
-      overflow-x: scroll;
-      touch-action: pan-x pan-y;
-    }
-
+  /* --- Responsive con columnas fijas --- */
+  @media (max-width: 768px) {
     th, td { padding: 0 6px; font-size: 12px; line-height: 20px; }
     .posicion-box, .dorsal-box { font-size: 16px; padding: 3px 8px; }
     td.equipo { min-width: 140px; }
     td.marca img { height: 24px; width: 24px; }
 
-    /* Columnas fijas: Posición, Clase, Piloto */
+    .table-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+    }
+
+    /* Columnas fijas */
     th:nth-child(1), td:nth-child(1) {
-      position: sticky; left: 0; z-index: 3; background-color: #1e1e1e;
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background-color: #1e1e1e;
     }
+
     th:nth-child(2), td:nth-child(2) {
-      position: sticky; left: 70px; z-index: 3; background-color: #1e1e1e;
+      position: sticky;
+      left: 70px;
+      z-index: 3;
+      background-color: #1e1e1e;
     }
+
     th:nth-child(3), td:nth-child(3) {
-      position: sticky; left: 140px; z-index: 3; background-color: #1e1e1e;
+      position: sticky;
+      left: 140px;
+      z-index: 3;
+      background-color: #1e1e1e;
     }
 
     table { min-width: 900px; }
-  }
-
-  /* --- Responsive Landscape --- */
-  @media (max-width: 1024px) and (orientation: landscape) {
-    body { padding: 10px; overflow: hidden; }
-    .table-container {
-      width: 100%;
-      overflow-x: auto;
-      overflow-y: hidden;
-    }
-
-    table {
-      min-width: 700px; /* hasta la columna Puntos */
-    }
-
-    th, td { font-size: 12px; }
-
-    th:nth-child(1), td:nth-child(1) {
-      position: sticky; left: 0; z-index: 3; background-color: #1e1e1e;
-    }
-    th:nth-child(2), td:nth-child(2) {
-      position: sticky; left: 70px; z-index: 3; background-color: #1e1e1e;
-    }
-    th:nth-child(3), td:nth-child(3) {
-      position: sticky; left: 140px; z-index: 3; background-color: #1e1e1e;
-    }
   }
 </style>
 </head>
@@ -179,7 +159,6 @@ fetch(url)
 
     const table = document.getElementById("clasificacion");
 
-    // Cabecera
     const thead = document.createElement("thead");
     const trHead = document.createElement("tr");
     cols.forEach(col => {
@@ -190,18 +169,13 @@ fetch(url)
     thead.appendChild(trHead);
     table.appendChild(thead);
 
-    // Filas
     const tbody = document.createElement("tbody");
     rows.forEach(row => {
       const tr = document.createElement("tr");
-      // Respeta el orden del Excel (Puntos entre Spec y COTA)
-      const ordered = ["Posición", "#", "Clase", "Piloto", "Equipo", "Marca", "Spec", "Puntos", "COTA", "INTE", "BAHR", "FUJI", "Pen"];
-      ordered.forEach(colName => {
-        const idx = cols.indexOf(colName);
-        if (idx === -1) return;
-        const cell = row.c[idx];
+      row.c.forEach((cell, i) => {
         const td = document.createElement("td");
         let value = cell ? cell.v : "";
+        const colName = cols[i];
 
         if (colName === "Posición") {
           td.innerHTML = `<div class="posicion-box"><span>${value}</span></div>`;
@@ -214,12 +188,13 @@ fetch(url)
         else if (colName === "Equipo") td.className = "equipo", td.innerText = value;
         else if (colName === "Marca") td.className = "marca", td.innerHTML = `<img src="${value}" alt="Marca">`;
         else if (colName === "Spec") td.className = "spec", td.innerText = value;
-        else if (colName === "Puntos") td.className = "puntos", td.innerText = value;
         else if (colName === "COTA") td.className = "cota", td.innerText = value;
         else if (colName === "INTE") td.className = "inte", td.innerText = value;
         else if (colName === "BAHR") td.className = "bahr", td.innerText = value;
         else if (colName === "FUJI") td.className = "fuji", td.innerText = value;
+        else if (colName === "Puntos") td.className = "puntos", td.innerText = value;
         else if (colName === "Pen") td.className = "pen", td.innerText = value;
+        else td.innerText = value;
 
         tr.appendChild(td);
       });
