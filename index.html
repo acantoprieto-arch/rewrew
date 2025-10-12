@@ -13,10 +13,22 @@
     padding: 20px;
   }
 
-  h1 {
-    text-align: center;
-    font-size: 14px;
-    margin-bottom: 20px;
+  /* --- Banner horizontal --- */
+  .banner {
+    width: 100%;
+    max-width: 1200px;
+    height: 120px; /* escritorio */
+    margin: 0 auto 15px auto;
+    display: block;
+    background: url("https://i.ibb.co/mCH1pvVQ/banner.jpg") center/cover no-repeat;
+    border-radius: 10px;
+  }
+
+  @media (max-width: 768px) {
+    .banner {
+      height: 80px; /* móvil */
+      margin-bottom: 10px;
+    }
   }
 
   .table-container {
@@ -48,7 +60,6 @@
   tr:nth-child(even) td { background-color: #282828; }
   tr:nth-child(odd) td { background-color: #1e1e1e; }
 
-  /* --- Cajas inclinadas --- */
   .posicion-box {
     display: inline-block;
     background-color: #DD0000;
@@ -75,22 +86,11 @@
   }
   .dorsal-box span { display: inline-block; transform: skew(20deg); }
 
-  /* --- Tamaños unificados --- */
-  td {
-    font-size: 14px;
-    line-height: 1.2;
-  }
-
-  td.posicion,
-  td.dorsal {
-    font-size: 18px;
-    font-weight: bold;
-  }
-
+  td { font-size: 14px; line-height: 1.2; }
+  td.posicion, td.dorsal { font-size: 18px; font-weight: bold; }
   td.piloto { font-weight: 600; }
   td.puntos { font-weight: bold; }
   td.pen { color: #ffffff; }
-
   td.equipo { min-width: 180px; }
   td.marca img {
     height: 38px;
@@ -140,7 +140,10 @@
 </style>
 </head>
 <body>
-<h1>Clasificación</h1>
+
+<!-- Banner horizontal -->
+<div class="banner"></div>
+
 <div class="table-container">
   <table id="clasificacion"></table>
 </div>
