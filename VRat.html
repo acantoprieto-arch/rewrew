@@ -13,7 +13,6 @@
     padding: 20px;
   }
 
-  /* --- Banner horizontal --- */
   .banner {
     width: 100%;
     max-width: 1200px;
@@ -86,10 +85,29 @@
   }
   .dorsal-box span { display: inline-block; transform: skew(20deg); }
 
+  /* Indicador triángulo / rectángulo */
+  .triangulo {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 10px solid #00FF00;
+    margin: 0 auto;
+  }
+  .rectangulo {
+    display: inline-block;
+    width: 12px;
+    height: 6px;
+    background-color: #888;
+    margin: 0 auto;
+    border-radius: 2px;
+  }
+
   td { font-size: 14px; line-height: 1.2; }
   td.posicion, td.dorsal { font-size: 18px; font-weight: bold; }
   td.piloto { font-weight: 600; }
-  td.vrat { font-weight: bold; } /* estilo igual que Puntos */
+  td.vrat { font-weight: bold; }
   td.equipo { min-width: 180px; }
   td.marca img {
     height: 38px;
@@ -99,7 +117,6 @@
     object-fit: contain;
   }
 
-  /* --- Responsive con columnas fijas --- */
   @media (max-width: 768px) {
     th, td { padding: 0 6px; font-size: 12px; line-height: 20px; }
     .posicion-box, .dorsal-box { font-size: 16px; padding: 3px 8px; }
@@ -112,7 +129,6 @@
       position: relative;
     }
 
-    /* Columnas fijas */
     th:nth-child(1), td:nth-child(1) { position: sticky; left: 0; z-index: 3; background-color: #1e1e1e; }
     th:nth-child(2), td:nth-child(2) { position: sticky; left: 70px; z-index: 3; background-color: #1e1e1e; }
     th:nth-child(3), td:nth-child(3) { position: sticky; left: 140px; z-index: 3; background-color: #1e1e1e; }
@@ -123,7 +139,6 @@
 </head>
 <body>
 
-<!-- Banner horizontal -->
 <div class="banner"></div>
 
 <div class="table-container">
@@ -139,8 +154,7 @@ fetch(url)
   .then(res => res.text())
   .then(data => {
     const json = JSON.parse(data.substr(47).slice(0, -2));
-    // Definimos los encabezados exactos
-    const cols = ["Posición","Clase","Piloto","#","Equipo","Marca","Espec.","VRat"];
+    const cols = ["Posición","Clase","Indicador","Piloto","#","Equipo","Marca","Espec.","VRat"];
     const rows = json.table.rows;
 
     const table = document.getElementById("clasificacion");
@@ -156,26 +170,47 @@ fetch(url)
     table.appendChild(thead);
 
     const tbody = document.createElement("tbody");
-    rows.forEach(row => {
+    rows.forEach((row, rowIndex) => {
       const tr = document.createElement("tr");
       cols.forEach((colName, i) => {
         const td = document.createElement("td");
-        const cell = row.c[i];
-        let value = cell ? cell.v : "";
+        let value = "";
 
         if (colName === "Posición") {
+          value = row.c[0]?.v || "";
           td.innerHTML = `<div class="posicion-box"><span>${value}</span></div>`;
           td.className = "posicion";
         } else if (colName === "#") {
+          value = row.c[3]?.v || "";
           td.innerHTML = `<div class="dorsal-box"><span>${value}</span></div>`;
           td.className = "dorsal";
-        } else if (colName === "Clase") td.className = "clase", td.innerText = value;
-        else if (colName === "Piloto") td.className = "piloto", td.innerText = value;
-        else if (colName === "Equipo") td.className = "equipo", td.innerText = value;
-        else if (colName === "Marca") td.className = "marca", td.innerHTML = `<img src="${value}" alt="Marca">`;
-        else if (colName === "Espec.") td.className = "spec", td.innerText = value;
-        else if (colName === "VRat") td.className = "vrat", td.innerText = value; // igual que Puntos
-        else td.innerText = value;
+        } else if (colName === "Clase") {
+          value = row.c[1]?.v || "";
+          td.className = "clase";
+          td.innerText = value;
+        } else if (colName === "Indicador") {
+          td.innerHTML = rowIndex < 18 ? '<div class="triangulo"></div>' : '<div class="rectangulo"></div>';
+        } else if (colName === "Piloto") {
+          value = row.c[2]?.v || "";
+          td.className = "piloto";
+          td.innerText = value;
+        } else if (colName === "Equipo") {
+          value = row.c[4]?.v || "";
+          td.className = "equipo";
+          td.innerText = value;
+        } else if (colName === "Marca") {
+          value = row.c[5]?.v || "";
+          td.className = "marca";
+          td.innerHTML = `<img src="${value}" alt="Marca">`;
+        } else if (colName === "Espec.") {
+          value = row.c[6]?.v || "";
+          td.className = "spec";
+          td.innerText = value;
+        } else if (colName === "VRat") {
+          value = row.c[7]?.v || "";
+          td.className = "vrat";
+          td.innerText = value;
+        }
 
         tr.appendChild(td);
       });
