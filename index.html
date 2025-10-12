@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Clasificación</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -100,8 +101,8 @@
     object-fit: contain;
   }
 
-  /* --- Responsive con columnas fijas --- */
-  @media (max-width: 768px) {
+  /* --- Responsive Portrait --- */
+  @media (max-width: 768px) and (orientation: portrait) {
     th, td { padding: 0 6px; font-size: 12px; line-height: 20px; }
     .posicion-box, .dorsal-box { font-size: 16px; padding: 3px 8px; }
     td.equipo { min-width: 140px; }
@@ -109,8 +110,10 @@
 
     .table-container {
       overflow-x: auto;
+      overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       position: relative;
+      height: 100vh;
     }
 
     /* Columnas fijas */
@@ -136,6 +139,52 @@
     }
 
     table { min-width: 900px; }
+  }
+
+  /* --- Responsive Landscape --- */
+  @media (max-width: 1024px) and (orientation: landscape) {
+    body {
+      padding: 10px;
+      overflow: hidden;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Ajuste automático hasta la columna “Puntos” */
+    table {
+      min-width: 650px; /* hasta columna Puntos */
+      max-width: 100%;
+      transform: scale(1);
+      transform-origin: left top;
+    }
+
+    th, td { font-size: 12px; }
+
+    /* Columnas fijas */
+    th:nth-child(1), td:nth-child(1) {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background-color: #1e1e1e;
+    }
+
+    th:nth-child(2), td:nth-child(2) {
+      position: sticky;
+      left: 70px;
+      z-index: 3;
+      background-color: #1e1e1e;
+    }
+
+    th:nth-child(3), td:nth-child(3) {
+      position: sticky;
+      left: 140px;
+      z-index: 3;
+      background-color: #1e1e1e;
+    }
   }
 </style>
 </head>
